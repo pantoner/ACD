@@ -7,7 +7,13 @@ client = TiingoClient({'api_key': "2727ca12f68fce3c489fb8bec1ff67b04d90b307"})
 symbols = ['MASI','SPY','ROAD','SYBX','SWIR','GKOS','RLJ','AQN','SERV','AVRO','MRO','SEDG','GBT','WYNN','AYX','AKR','AERI','CLDT','IONS','JNCE','PCG','PTCT','LADR','SJW','CEMI','BHLB',\
 'MRK','POR','PBF','NWL','VFC','MPW','PFPT','MHK','GIL','COLM','GPC','ELAN','ORBC','UPS','TFX','NOC','TS','MC','CODI','EQC','TYL','TTEK','APLS','LIVN','ETN','HAFC','FCF','CHRW','NCR',\
 'SBUX','LW','WAT','FBP','MEDP','CURO','FIBK','HSII','SCI','E','GT','INDB','GBCI','FFIN','SBCF','MAT','IEX','FFBC','FWRD','HTBK','COLB','APD','HFWA','UBSI','WSO','KMI','BRKL','NTGR','ECHO',\
-'BPFH','ICLR','ARCH','HCA','FCFS','UCBI','WRB','FMBI','IBKR','CBSH','PACW','ELS','HSTM']
+'BPFH','ICLR','ARCH','HCA','FCFS','UCBI','WRB','FMBI','IBKR','CBSH','PACW','ELS','HSTM', 'SNAP''SIMO','SHAK','X','CEMI','BGCP','PQG','LNDC','IO','NEPH','IVC','NVCN','TSLA','ALKS','ASPS', \
+'EHTH','MAT','GHL','VNE','SILK','VCRA','NOV','ALIM','IVAC','SQNS','PEGA','ATRC','TWOU','NBR','FEYE','SHOP','SPOT','HES','CCJ','AMRN','APLS','STNG','INFY','MS','PPG','ALLY','STLD','PM','MLI',\
+'KO','GATX','IBKR','FE','ISRG','WRB','DB','APH','CP','DOV','IBM','GGG','PLXS','UFPI','UNP','STM','TRV','HSY','ALLE','FIX','STC','MAT','NEP','HON','LECO','SANM','NXPI','BRO','SJM','NAV','ENS',\
+'CIR','MNRO','HPQ','HRL','MDT','LB','RXN','FLOW','PRA','UFS','WCN','FLS','CBT','LNT','NWSA','SLF','RSG','PNW','CFX','CCOI','BLL','BDX','AAON','AES','ZTS','WTS','HCC','ALB','QNST','RYN','NI','TRI',\
+'PERI','AVNS','ARES','AEP','ALE','ES','DIS','EXR','PRU','MEOH','ZBH','WRK','JELD','ITW','AME','CRI','EXC','FN','CWST','MWA','MOS','TKR','WY','PEG','ITT','JCI','FCAU','CAT','AON','AJG','F','FTAI',\
+'FND','HUBG','GFF','HIG','MTX','LBRDK','WM','WLTW','XYL','WCC','TRS','K','LM','MMC','MT','OSK'.'ODFL','SO','SWK','HBI','CNHI','CMCSA','ELAN','CNMD','ADM','FBHS','TSE','SKY','SIGI','WNC','NSC','R',\
+'GIB','ETN','BG','EIX','CE','CCS','FTV','HRZN','RNR','MDLX','UNM','XRX','WAT','HUN','MDC','MMM','MLM','ST','GLW','CINF']
 
 today = '07-14-2020'
 conn = sqlite3.connect("Minus4Earningsdb.db")
