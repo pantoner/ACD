@@ -4,14 +4,14 @@ from tiingo import TiingoClient
 import pandas as pd
 import sqlite3
 client = TiingoClient({'api_key': "2727ca12f68fce3c489fb8bec1ff67b04d90b307"})
-symbols =  ['TBIO','DBX','ASMB','QDEL','KDP','PFSI','FTNT','LVGO','ALTM','AGLE','HAIN','NOMD','EIGR','AAWW','CNST','AWK','PVG','SRPT','CENTA','FSLY','LGND','ADTN','REAL','ATRA','AEIS',\
+symbols = ['TBIO','DBX','ASMB','QDEL','KDP','PFSI','FTNT','LVGO','ALTM','AGLE','HAIN','NOMD','EIGR','AAWW','CNST','AWK','PVG','SRPT','CENTA','FSLY','LGND','ADTN','REAL','ATRA','AEIS',\
 'FVRR','W','OSB','ABC','ENR','CLVS','BGS','LOPE','EXPI','GNMK','ACIA','KLAC','CHGG','TREX','CLX','PBFX','BAH','BERY','MPWR','FORM','BAND','HOLX','YUMC','PB','APAM','SPGI','DHI','GCAP',\
-'VLY','DTE','SLGN','CALX','FNF','ETSY','BIDU','AA','STLD','IRBT','TMO','CLGX','DGX','NUE0','TPX','WTER','TACO','MXL','TPB','HUN','SHW','PKI','MXIM','SBH','CRTO','FORM','ZYXI','RYI','PTC',\
-'MAS','SAH','XLNX','QDEL','FRTA','LMNX','INMD','VCEL','MATX','NUS','GDDY'.'PCRX','HIMX','KOP','HEAR','LVGO','KINS','AXNX','FSCT','VERI','XP','MTBC','BLFS','WYY','PRCP','ADS','TBBK','VRSN',\
+'VLY','DTE','SLGN','CALX','FNF','ETSY','BIDU','AA','STLD','IRBT','TMO','CLGX','DGX','NUE','TPX','WTER','TACO','MXL','TPB','HUN','SHW','PKI','MXIM','SBH','CRTO','FORM','ZYXI','RYI','PTC',\
+'MAS','SAH','XLNX','QDEL','FRTA','LMNX','INMD','VCEL','MATX','NUS','GDDY','PCRX','HIMX','KOP','HEAR','LVGO','KINS','AXNX','FSCT','VERI','XP','MTBC','BLFS','WYY','PRCP','ADS','TBBK','VRSN',\
 'PB','BLKB','BAH','MGP','WES','HEP','CIM','NDLS','CQP','CWK','DBX','G','UTI','VGR','AVYA','NBLX','ET','RICK','SUN','TAK','VVI','VMW','AEO','GIII','CIEN','ZUMZ','GCO','PRGS','AUY','NFLX','BLK',\
 'SMPL','SNX','RAD','VIPS','DOYU','SINA','EQX','SSRM','JD','ETRN','CELH','HEAR','NTDOY','FOCS','ABBV']
 
-today = '07-14-2020'
+today = '07-15-2020'
 conn = sqlite3.connect("Plus5Earningsdb.db")
 conn2 = sqlite3.connect("Plus5minbymin.db")
 #plus5df = pd.read_sql_query("SELECT * from range", conn)

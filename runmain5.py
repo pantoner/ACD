@@ -8,9 +8,10 @@ from PyQt5.QtMultimediaWidgets import *
 from PyQt5.QtWidgets import QMessageBox
 from io import StringIO
 from tiingo import TiingoClient
-from main6 import Ui_MainWindow
+from main9 import Ui_MainWindow
 import pandas as pd
 import pickle
+import sqlite3
 from datetime import datetime
 # import algos
 # import paramind
@@ -22,9 +23,14 @@ from datetime import datetime
 # import mybucketfunctions
 # import getaggregate
 import getACD
+import newACDminus42
+import newACDplus52
+import check5up2
+import check4dwn2
 import config
 
-pd.set_option('colheader_justify', 'center')   # FOR TABLE <th>
+
+#pd.set_option('colheader_justify', 'center')   # FOR TABLE <th>
 #ftp.nasdaqtrader.com/symboldirectory
 class MainWindow(QMainWindow, Ui_MainWindow):
 	def __init__(self, *args, **kwargs):
@@ -57,6 +63,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		config.start = self.dateEditStart.date().year();config.start = self.dateEditStart.date().month();config.start = self.dateEditStart.date().day()
 		config.symbol = self.lineEditSymbol.text()
 		self.checkBoxToday.stateChanged.connect(self.CalendarHide)
+
 		
 		#self.radioButtonWeekly_2.clicked.connect(self.resetindicators)
 		# self.cloudthread = cloudThread()
@@ -67,8 +74,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		# self.aggregatethread = aggregateThread()
 		# self.aggregateachthread = aggregateachThread()
 		self.acdthread = acdThread()
+		self.minus4thread = minus4Thread()
+		self.plus5thread = plus5Thread()
+		self.auplongthread = auplongThread()
+		self.adwnshortthread = adwnshortThread()
+
+	def highup(self):
+		self.lineEditAup.setStyleSheet("color: rgb(255, 255, 0);")
+		self.lineEditOpenRangeLow.setStyleSheet("color:rgb(85, 0, 255);")
+		if pivottop > nowclose:
+			self.lineEditPivotRangeTop.setStyleSheet("color: rgb(255, 0 ,0);")
+		elif pivottop < nowclose:
+			self.lineEditPivotRangeTop.setStyleSheet("color:rgb(85, 0, 255);")
+	
+	def resetcolor(self):
+		self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
+		self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
+		self.lineEditPivotRangeTop.setStyleSheet("color: rgb(0, 0, 0);")
+		self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
 
 	def getACD(self):
+		self.resetcolor()
 		if os.path.exists("yesterday.p"):
 			os.remove("yesterday.p")
 
@@ -79,6 +105,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			os.remove("thirtydays.p")
 
 		symbol = str(self.lineEditSymbol.text())
+
+		self.labelSymbol.setOpenExternalLinks(True);
+		theurl = f"http://www.earningswhispers.com/tradeview/{symbol}"
+		#theurl = f"https://stockcharts.com/h-sc/ui?s={symbol}"
+		print(theurl)
+		self.labelSymbol.setText(f"<a href= {theurl} >{symbol} Link</a>");
+		
 
 		yesterdayyear = str(self.dateEditYesterday.date().year())
 		yesterdaymonth = str(self.dateEditYesterday.date().month()).zfill(2)
@@ -111,10 +144,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		start = str(start['year']+"-"+start['month']+"-"+start['day'])
 		try:
 			df = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
-			    fmt='csv',
-			    frequency='20Min',
-			    startDate= today,
-			    endDate='12-30-2020')))
+				fmt='csv',
+				frequency='20Min',
+				startDate= today,
+				endDate='12-30-2020')))
 			openrangehigh = round(df.iloc[0, 2],2)
 			openrangelow = round(df.iloc[0, 3],2)
 			print(f"open range high {openrangehigh} open range low {openrangelow}")
@@ -127,10 +160,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		 #get pivot from yesterday
 		try:
 			ydf = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
-			    fmt='csv',
-			    frequency='daily',
-			    startDate= yesterday,
-			    endDate='12-30-2020')))
+				fmt='csv',
+				frequency='daily',
+				startDate= yesterday,
+				endDate='12-30-2020')))
 			pivothigh = ydf.iloc[0, 2]
 			pivotlow = ydf.iloc[0, 3]
 			pivotclose = ydf.iloc[0, 1]
@@ -155,9 +188,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditTone.setText("Bearish")
 				self.lineEditTone.setStyleSheet("color: rgb(255, 0, 0);")
 			else:
-			    print("Neutral tone")
-			    self.lineEditTone.setText("Neutral")
-			    self.lineEditTone.setStyleSheet("color: rgb(0, 0, 0);")
+				print("Neutral tone")
+				self.lineEditTone.setText("Neutral")
+				self.lineEditTone.setStyleSheet("color: rgb(0, 0, 0);")
 		except:
 			self.lineEditDailyPivotNumber.setText(str("Not Ready"))
 			self.lineEditPivotRangeTop.setText(str("Not Ready"))
@@ -165,10 +198,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			self.lineEditTone.setText("Not Ready")
 			#get 30 days back
 		tdf = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
-		    fmt='csv',
-		    frequency='daily',
-		    startDate= start,
-		    endDate='12-30-2020')))
+			fmt='csv',
+			frequency='daily',
+			startDate= start,
+			endDate='12-30-2020')))
 
 
 		try:
@@ -177,6 +210,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			Aup = round(openrangehigh + Avalue,2)
 			Adwn = round(openrangelow - Avalue,2)
 			momentum1 = tdf.iloc[-1,1] - tdf.iloc[-9,1]
+			momentumyesterday2 = tdf.iloc[-2,1] - tdf.iloc[-10,1] 
+			momentumyesterday3 = tdf.iloc[-3,1] - tdf.iloc[-11,1] 
+			print(momentumyesterday2)
+
 			momentum2 = float(round(momentum1,2))
 			self.lineEditMomentum.setText(str(momentum2))
 			if momentum2 > 0:
@@ -186,6 +223,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			else:
 				self.lineEditMomentum.setStyleSheet("color: rgb(0, 0, 0);")
 
+			momentumyesterday2 = float(round(momentumyesterday2,2))
+			self.lineEditMomentumYesterday2.setText(str(momentumyesterday2))
+			if momentumyesterday2 > 0:
+				self.lineEditMomentumYesterday2.setStyleSheet("color: rgb(0, 170, 127);")
+			elif momentumyesterday2 < 0:
+				self.lineEditMomentumYesterday2.setStyleSheet("color: rgb(255, 0, 0);")
+			else:
+				self.llineEditMomentumYesterday2.setStyleSheet("color: rgb(0, 0, 0);")
+
+			momentumyesterday3 = float(round(momentumyesterday3,2))
+			self.lineEditMomentumYesterday3.setText(str(momentumyesterday3))
+			if momentumyesterday3 > 0:
+				self.lineEditMomentumYesterday3.setStyleSheet("color: rgb(0, 170, 127);")
+			elif momentumyesterday3 < 0:
+				self.lineEditMomentumYesterday3.setStyleSheet("color: rgb(255, 0, 0);")
+			else:
+				self.lineEditMomentumYesterday3.setStyleSheet("color: rgb(0, 0, 0);")	
+
 			print(f" Top A value {Aup} , bottom A value {Adwn}")
 			self.lineEditAup.setText(str(Aup))
 			self.lineEditAdwn.setText(str(Adwn))
@@ -193,46 +248,121 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			self.lineEditAup.setText(str("not ready yet"))
 			self.lineEditAdwn.setText(str("not ready yet"))
 #want to add the last 10 minute close to this99
-		try:
-			df = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
-			    fmt='csv',
-			    frequency='10Min',
-			    startDate= today,
-			    endDate='12-30-2020')))
-			nowclose = round(df.iloc[-1, 1],2)
-			nowopen = round(df.iloc[-1, 4],2)
-			print(f"open range high {openrangehigh} open range low {openrangelow}")
-			self.lineEditLastClose.setText(str(nowclose))
-			self.lineEditLastOpen.setText(str(nowopen))
+		#try:
+		df = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
+			fmt='csv',
+			frequency='10Min',
+			startDate= today,
+			endDate='12-30-2020')))
+		nowclose = round(df.iloc[-1, 1],2)
+		nowopen = round(df.iloc[-1, 4],2)
+		print(f"open range high {openrangehigh} open range low {openrangelow}")
+		self.lineEditLastClose.setText(str(nowclose))
+		self.lineEditLastOpen.setText(str(nowopen))
 			
-			if nowclose > Aup and nowopen > Aup:
-				self.lineEditLastClose.setStyleSheet("color: rgb(0, 170, 127);")
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
-			elif nowclose < Adwn and nowopen < Adwn:
-				self.lineEditLastClose.setStyleSheet("color: rgb(255, 0, 0);")
-				self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
-			elif nowopen > Aup and nowclose < Aup:
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
-				self.lineEditLastClose.setStyleSheet("color: rgb(0, 0, 0);")
-			elif nowopen < Adwn and nowclose > Adwn:
-				self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
-				self.lineEditLastClose.setStyleSheet("color: rgb(0, 0, 0);")
-			elif nowopen < Aup and nowclose > Aup:
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
-				self.lineEditLastClose.setStyleSheet("color: rgb(0, 170, 127);")
-			elif nowopen > Adwn and nowclose < Adwn:
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
-				self.lineEditLastClose.setStyleSheet("color: rgb(255, 0, 0);")
-			else:
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
-				self.lineEditLastClose.setStyleSheet("color: rgb(0, 0, 0);")
+		if nowclose > Aup and nowopen > Aup:
+			self.lineEditLastClose.setStyleSheet("color: rgb(0, 170, 127);")
+			self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
+			self.lineEditAup.setStyleSheet("color: rgb(255, 255, 0);")
+			self.lineEditOpenRangeLow.setStyleSheet("color:rgb(85, 0, 255);")
+		elif pivottop > nowclose and nowclose > Aup and nowopen > Aup:
+			self.lineEditPivotRangeTop.setStyleSheet("color: rgb(255, 0 ,0);")
+		elif pivottop < nowclose and nowclose > Aup and nowopen > Aup:
+			self.lineEditPivotRangeTop.setStyleSheet("color:rgb(85, 0, 255);")
+		elif openrangelow < pivottop and nowclose > Aup and nowopen > Aup:
+			self.lineEditPivotRangeBottom.setStyleSheet("color:rgb(0, 0, 0);")
+		elif openrangelow > pivottop and nowclose > Aup and nowopen > Aup:
+			self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
 
-		except:
-			self.lineEditLastClose.setText(str("not time yet"))
-			self.lineEditLastOpen.setText(str("not time yet"))
+		elif nowclose < Adwn and nowopen < Adwn:
+			self.lineEditLastClose.setStyleSheet("color: rgb(255, 0, 0);")
+			self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
+			self.lineEditAdwn.setStyleSheet("color: rgb(255, 255, 0);")
+			self.lineEditOpenRangeHigh.setStyleSheet("color:rgb(85, 0, 255);")
+		elif nowclose < Adwn and nowopen < Adwn and pivotbottom < nowclose:
+			self.lineEditPivotRangeBottom.setStyleSheet("color: rgb(0, 170, 127);")
+		elif pivotbottom > nowclose and pivotbottom < nowclose:
+			self.lineEditPivotRangeTop.setStyleSheet("color:rgb(85, 0, 255);")
+		elif openrangehigh < pivotbottom and nowclose < Adwn and nowopen < Adwn:
+			self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
+		elif openrangehigh > pivotbottom and pivotbottom < nowclose:
+			self.lineEditOpenRangeHigh.setStyleSheet("color:rgb(0, 0, 0);")
+
+
+
+		elif nowopen > Aup and nowclose < Aup:
+			self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
+			self.lineEditLastClose.setStyleSheet("color: rgb(0, 0, 0);")
+		elif nowopen < Adwn and nowclose > Adwn:
+			self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
+			self.lineEditLastClose.setStyleSheet("color: rgb(0, 0, 0);")
+		elif nowopen < Aup and nowclose > Aup:
+			self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
+			self.lineEditLastClose.setStyleSheet("color: rgb(0, 170, 127);")
+		elif nowopen > Adwn and nowclose < Adwn:
+			self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
+			self.lineEditLastClose.setStyleSheet("color: rgb(255, 0, 0);")
+		else:
+			self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
+			self.lineEditLastClose.setStyleSheet("color: rgb(0, 0, 0);")
+
+		# except:
+		# 	self.lineEditLastClose.setText(str("not time yet"))
+		# 	self.lineEditLastOpen.setText(str("not time yet"))
 
 
 		self.acdthread.start()
+
+	def getminus4(self):
+		self.minus4thread.start()
+
+	def getplus5(self):
+		self.plus5thread.start()
+
+	def getauplong(self):
+		self.auplongthread.start()
+
+	def getadwnshorts(self):
+		self.adwnshortthread.start()
+
+	def load_initial_data(self):
+		# where c is the cursor
+		self.tableWidget.setRowCount(0)
+		conn = sqlite3.connect("symbollistdb.db")
+		cur = conn.cursor()
+		query = 'SELECT * FROM symbols'
+		cur.execute(query)
+		rows = cur.fetchall()
+
+		for row in rows:
+			inx = rows.index(row)
+			self.tableWidget.insertRow(inx)
+			# add more if there is more columns in the database.
+			self.tableWidget.setItem(inx, 0, QTableWidgetItem(row[1]))
+			self.tableWidget.setItem(inx, 1, QTableWidgetItem(row[2]))
+			self.tableWidget.setItem(inx, 2, QTableWidgetItem(row[3]))
+
+
+	def addsymbols(self):
+		thissymbol = str(self.lineEditAddSymbol.text())
+		thisnotes = str(self.lineEditNotes.text())
+		self.dateEditDeleteDate
+		deleteyear = str(self.dateEditDeleteDate.date().year())
+		deletemonth = str(self.dateEditDeleteDate.date().month()).zfill(2)
+		deleteday = str(self.dateEditDeleteDate.date().day()).zfill(2)
+		deletedict = dict({ 'year': deleteyear , 'month': deletemonth, "day" :deleteday})
+		deletedaystr = str(deletedict['year']+"-"+deletedict['month']+"-"+deletedict['day'])
+
+		symbollistdict = dict({'symbol': [thissymbol],'notes':thisnotes,'deleteday':deletedaystr})
+		symboldf = pd.DataFrame(symbollistdict)
+		conn = sqlite3.connect("symbollistdb.db")
+		symboldf.to_sql('symbols', conn, if_exists='append')
+		#pickle.dump( yesterdaydict, open( "yesterday.p", "wb" ) )
+		self.labelSymbolAccepted.setText(str("Complete"))
+		self.lineEditAddSymbol.clear()
+		self.lineEditNotes.clear()
+		self.labelSymbolAccepted.setStyleSheet("color: rgb(0, 170, 127);")
+		self.load_initial_data()
 
 	def getallsymbols(self):
 		config.startyear = self.dateEditStart.date().year();config.startmonth = self.dateEditStart.date().month();config.startday = self.dateEditStart.date().day()
@@ -503,7 +633,45 @@ class acdThread(QThread):
 		except:
 			print("not ready yet")
 
+class minus4Thread(QThread):
+	signal = pyqtSignal('PyQt_PyObject')
+	def __init__(self):
+		QThread.__init__(self)  
 
+	def run(self):
+		#try:
+		newACDminus42.minus4()
+		#except:
+			#print("not ready yet")
+
+class plus5Thread(QThread):
+	signal = pyqtSignal('PyQt_PyObject')
+	def __init__(self):
+		QThread.__init__(self)  
+
+	def run(self):
+		#try:
+		newACDplus52.plus5()
+		#except:
+			#print("not ready yet")
+
+class auplongThread(QThread):
+	signal = pyqtSignal('PyQt_PyObject')
+	def __init__(self):
+		QThread.__init__(self)  
+
+	def run(self):
+		#try:
+		check5up2.check5up()
+
+class adwnshortThread(QThread):
+	signal = pyqtSignal('PyQt_PyObject')
+	def __init__(self):
+		QThread.__init__(self)  
+
+	def run(self):
+		#try:
+		check4dwn2.check4dwn()
 
 class DailyDownLoadThread(QThread):
 	signal = pyqtSignal('PyQt_PyObject')

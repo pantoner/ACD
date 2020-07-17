@@ -10,7 +10,7 @@ import config
 starttime = time.time()
 thissymbollist = []
 while True:
-	today = '07-14-2020'
+	today = '07-16-2020'
 	#conn = sqlite3.connect("Minus4Earningsdb.db")
 	conn2 = sqlite3.connect("Minus4minbymin.db")
 	#dfminus4 = pd.read_sql_query("SELECT * from range", conn)
@@ -25,6 +25,6 @@ while True:
 	alertsymbolist = thealerts.index.values
 	for symbol in alertsymbolist:
 		if symbol not in  thissymbollist: 
-			ctypes.windll.user32.MessageBoxW(0, str(symbol), "Minus4Earningsdb", 1)
+			ctypes.windll.user32.MessageBoxW(0, str(symbol), "Minus 4 A dwn", 1)
 			thissymbollist.append(symbol)
 	time.sleep(120.0 - ((time.time() - starttime) % 120.0))
