@@ -10,7 +10,8 @@ import config
 starttime = time.time()
 thissymbollist = []
 while True:
-	today = '07-16-2020'
+	today = pickle.load( open( "today.p", "rb" ) )
+	today = str(today['year']+"-"+today['month']+"-"+today['day'])
 	#conn = sqlite3.connect("Minus4Earningsdb.db")
 	conn2 = sqlite3.connect("Minus4minbymin.db")
 	#dfminus4 = pd.read_sql_query("SELECT * from range", conn)
