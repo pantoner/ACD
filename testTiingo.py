@@ -92,7 +92,8 @@ thisdf['profitneg']= thisdf['price']/Adwn
 
 thisdf['AUPTrue'] = thisdf['timeaboveAup'].rolling(10).sum()
 thisdf['AUPTrueTrue'] = thisdf['timeaboveAup'].cumsum()
-thisdf['AUPDWNTrue'] = thisdf['timebelowAdwn'].rolling(10).sum()
+thisdf['ADWNTrue'] = thisdf['timebelowAdwn'].rolling(10).sum()
+thisdf['ADWNTrueTrue'] = thisdf['timebelowAdwn'].cumsum()
 print(thisdf.columns)
 
 
@@ -101,7 +102,7 @@ wasauplist=[]
 output = []
 # def wasaupfunc(thisdf):
 while n < len(thisdf):
-	if thisdf.iloc[n,12] >9:
+	if thisdf.loc[n,'AUPTrue'] >9:
 		wasauplist.append(1)
 	else:
 		wasauplist.append(0)
@@ -113,12 +114,135 @@ while n < len(thisdf):
 
 
 wasaupdf = pd.DataFrame({'wasaup':output})
-thisdf = thisdf.append(wasaupdf)
-print(thisdf.columns)
+thisdf2 = pd.merge(thisdf,wasaupdf, how='left',left_index=True,right_index=True)
+
+#thisdf2 = thisdf2.append(wasaupdf)
+#outputtocsv = thisdf2[['AUPTrue','timeaboveAup','AUPTrue','AUPTrueTrue','timebelowAdwn','price','profitpos','avgvolume','wasaup']].copy()
+#output.to_csv('C:/Python37/ACD/output.csv')
+print(thisdf2.columns)
+
+n= 0
+wasadwnlist=[]
+output = []
+# def wasaupfunc(thisdf):
+while n < len(thisdf2):
+	if thisdf2.loc[n,'ADWNTrue'] >9:
+		wasadwnlist.append(1)
+	else:
+		wasadwnlist.append(0)
+	if sum(wasadwnlist) == 0:
+		output.append(False) 
+	else:
+		output.append(True)
+	n +=1
+
+
+wasadwndf = pd.DataFrame({'wasadwn':output})
+thisdf3 = pd.merge(thisdf2,wasadwndf, how='left',left_index=True,right_index=True)
+# print(thisdf3.columns)
+# outputtocsv = thisdf3[['AUPTrue','timeaboveAup','AUPTrue','AUPTrueTrue','timebelowAdwn','price','profitpos','avgvolume','wasaup','wasadwn']].copy()
+# outputtocsv.to_csv('C:/Python37/ACD/output.csv')
+
+
+
+# figure out fail -- 
+
+#figure out C
+thisdf3['timebelowCdwn'] = thisdf3.apply(lambda x: x['price'] <= Adwn and x['wasaup'] == True, axis=1)  #just like line 85
+thisdf3['CDWNTrue'] = thisdf3['timebelowCdwn'].rolling(10).sum()  # line 93
+thisdf3['CDWNTrueTrue'] = thisdf3['timebelowCdwn'].cumsum() # line 94
+
+n= 0
+wascdwnlist=[]
+output = []
+# def wasaupfunc(thisdf):
+while n < len(thisdf3):
+	if thisdf3.loc[n,'CDWNTrue'] >9:
+		wascdwnlist.append(1)
+	else:
+		wascdwnlist.append(0)
+	if sum(wascdwnlist) == 0:
+		output.append(False) 
+	else:
+		output.append(True)
+	n +=1
+
+wascdwndf = pd.DataFrame({'wascdwn':output})
+thisdf3 = pd.merge(thisdf3,wascdwndf, how='left',left_index=True,right_index=True)
+
+# C UP
+thisdf3['timeaboveCup'] = thisdf3.apply(lambda x: x['price'] >= Aup and x['wasadwn'] == True, axis=1)  #just like line 88
+thisdf3['CUPTrue'] = thisdf3['timeaboveCup'].rolling(10).sum()  # line 95
+thisdf3['CUPTrueTrue'] = thisdf3['timeaboveCup'].cumsum() # line 96
+
+n= 0
+wascuplist=[]
+output = []
+# def wasaupfunc(thisdf):
+while n < len(thisdf3):
+	if thisdf3.loc[n,'CUPTrue'] >9:
+		wascuplist.append(1)
+	else:
+		wascuplist.append(0)
+	if sum(wascuplist) == 0:
+		output.append(False) 
+	else:
+		output.append(True)
+	n +=1
+
+wascupdf = pd.DataFrame({'wascup':output})
+thisdf3 = pd.merge(thisdf3,wascupdf, how='left',left_index=True,right_index=True)
+
+
+# CDWNTrueTruelist = []
+# while n < len(thisdf3):
+# 	if thisdf3.loc[n,'wasaup'] == True and thisdf3.loc[n,'timebelowAdwn'] == True:
+# 		CDWNTruelist.append(thisdf3['timebelowAdwn'].rolling(10).sum())
+# 		CDWNTrueTruelist.append(thisdf3['timebelowAdwn'].cumsum())
+# 	else:
+# 		CDWNTruelist.append(0)
+# 		CDWNTrueTruelist.append(0)
+# CDWNTruedf = pd.DataFrame({'CDWNTrue':output})
+# CDWNTrueTruedf = pd.DataFrame({'CDWNTrueTrue':output})
+# thisdf4 = pd.merge(thisdf3,CDWNTruedf , how='left',left_index=True,right_index=True)
+# thisdf5 = pd.merge(thisdf4,CDWNTrueTruedf, how='left',left_index=True,right_index=True)
+
+# n= 0
+# wascdwnlist=[]
+# output = []
+# # def wasaupfunc(thisdf):
+# while n < len(thisdf5):
+# 	if thisdf5.loc[n,'CDWNTrue'] >9:
+# 		wasadwnlist.append(1)
+# 	else:
+# 		wasadwnlist.append(0)
+# 	if sum(wasadwnlist) == 0:
+# 		output.append(False) 
+# 	else:
+# 		output.append(True)
+# 	n +=1
+
+
+# wasadwndf = pd.DataFrame({'wasadwn':output})
+# thisdf3 = pd.merge(thisdf2,wasadwndf, how='left',left_index=True,right_index=True)
+
+
+outputtocsv = thisdf3[['AUPTrue','timeaboveAup','AUPTrue','AUPTrueTrue','timebelowAdwn','price','profitpos','avgvolume','wasaup','CDWNTrue','CDWNTrueTrue','wascdwn',\
+'CUPTrue','CUPTrueTrue','wascup']].copy()
+outputtocsv.to_csv('C:/Python37/ACD/output.csv')
+
+
+
+
+
+#if wasAup == True and w
 
 # next create wasdwndf, then can figure out the C's and the EOD positions --
 
-
+# 'ADWNTrue', 'ADWNTrueTrue', 'AUPTrue', 'AUPTrueTrue', 'adjprice',
+#        'avgvolume', 'maxprice', 'minprice', 'price', 'profitneg', 'profitpos',
+#        'relativeprice', 'relativevolume', 'timeaboveAup', 'timebelowAdwn',
+#        'volume', 'wasadwn', 'wasdwn'],
 
 
 	# 	if thisdf['wasAup'].shift(-1) == True:
@@ -130,11 +254,11 @@ print(thisdf.columns)
 
 
 
-#output = thisdf[['AUPTrue','timeaboveAup','AUPTrue','AUPTrueTrue','timebelowAdwn','price','profitpos','avgvolume']].copy()
+#output = thisdf2[['AUPTrue','timeaboveAup','AUPTrue','AUPTrueTrue','timebelowAdwn','price','profitpos','avgvolume','wasaup']].copy()
 #print(thisdf[['AUPTrue','timeaboveAup','AUPTrue','AUPTrueTrue','price','profitpos','avgvolume']].copy())
 
 
-#output.to_csv('C:/Python37/ACD/output.csv')
+#outputtocsv.to_csv('C:/Python37/ACD/output.csv')
 #print(thisdf.wasAup)
 #weighted by opening volume
 
