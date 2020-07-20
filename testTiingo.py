@@ -9,18 +9,18 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # API_KEY = '' # your API KEY here
 client = TiingoClient({'api_key': "2727ca12f68fce3c489fb8bec1ff67b04d90b307"})
-symbolname = 'MRNA'
+symbolname = 'MSFT'
 df = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
     fmt='csv',
     frequency='1min',
-    startDate= '07-17-2020',
+    startDate= '07-20-2020',
     endDate='12-30-2020')))
 
 
 tdf = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
 	fmt='csv',
 	frequency='daily',
-	startDate= '06/04/2020',
+	startDate= '06/08/2020',
 	endDate='12-30-2020')))
 
 
@@ -271,7 +271,7 @@ while n < len(thisdf3):
 		CDWNfail.append(False)
 	n +=1
 
-wascdwnfaildf = pd.DataFrame({'wascudwnfail':CDWNfail})
+wascdwnfaildf = pd.DataFrame({'wascdwnfail':CDWNfail})
 thisdf3 = pd.merge(thisdf3,wascdwnfaildf, how='left',left_index=True,right_index=True)
 
 # "'bool' object has no attribute 'cumsum'", 'occurred at index 0')
@@ -282,46 +282,77 @@ thisdf3 = pd.merge(thisdf3,wascdwnfaildf, how='left',left_index=True,right_index
 thisdf3['EODoverAup'] = thisdf3.apply(lambda x: x['price'] >= Aup, axis=1)  #just like left_indexe 88
 thisdf3['EODbelowAdwn'] = thisdf3.apply(lambda x: x['price'] <= Adwn, axis=1)  #just like line 88
 thisdf3['EODbetweenOR'] = thisdf3.apply(lambda x: x['price'] <= openrangelow and x['price'] <= openrangehigh, axis=1)  #just like line 88
-thisdf3['EODbelowAup'] = thisdf3.apply(lambda x: x['price'] < Aup, axis=1)  #just like line 88
-thisdf3['EODaboveAdwn'] = thisdf3.apply(lambda x: x['price'] > Adwn, axis=1)  #just like line 88
+thisdf3['EODaboveOR'] = thisdf3.apply(lambda x: x['price'] > openrangelow, axis=1)  #just like line 88
+thisdf3['EODbelowOR'] = thisdf3.apply(lambda x: x['price'] < openrangehigh, axis=1)  #just like line 88
+thisdf3['EODabovetopOR'] = thisdf3.apply(lambda x: x['price'] > openrangehigh, axis=1)  #just like line 88
+thisdf3['EODbelowbottomOR'] = thisdf3.apply(lambda x: x['price'] < openrangelow, axis=1)  #just like line 88
 
 wascupdf = pd.DataFrame({'wascup':output})
 thisdf3 = pd.merge(thisdf3,wascupdf, how='left',left_index=True,right_index=True)
 
+EODabovetopOR = thisdf3.iloc[-1].EODabovetopOR  # 1 result
+EODbelowbottomOR = thisdf3.iloc[-1].EODbelowbottomOR  # 2 result
+EODoverAup = thisdf3.iloc[-1].EODoverAup  # 3 result
+EODbelowAdwn = thisdf3.iloc[-1].EODbelowAdwn  # 4 result
+EODbetweenOR = thisdf3.iloc[-1].EODbetweenOR  # 5 result
+EODaboveOR = thisdf3.iloc[-1].EODaboveOR  # 6 result
+EODbelowOR = thisdf3.iloc[-1].EODbelowOR  # 7 result
 
-EODoverAup = thisdf3.iloc[-1].EODoverAup
-EODbelowAdwn = thisdf3.iloc[-1].EODbelowAdwn
-EODbetweenOR = thisdf3.iloc[-1].EODbetweenOR
-EODbelowAup = thisdf3.iloc[-1].EODbelowAup
-EODaboveAdwn = thisdf3.iloc[-1].EODaboveAdwn
-EODAUPTrue = thisdf3.iloc[-1].AUPTrue
-EODCUPTrue = thisdf3.iloc[-1].CUPTrue
-EODADWNTrue = thisdf3.iloc[-1].ADWNTrue
-EODCDWNTrue = thisdf3.iloc[-1].CDWNTrue
+EODAUPTrue = thisdf3.iloc[-1].AUPTrue  #1 succss
+EODCUPTrue = thisdf3.iloc[-1].CUPTrue  #2 success
+EODADWNTrue = thisdf3.iloc[-1].ADWNTrue #3 success
+EODCDWNTrue = thisdf3.iloc[-1].CDWNTrue #4 success
 
-ACDMacro =[]
+EODAUPFail = thisdf3.iloc[-1].wasaupfail #1 fail
+EODCUPFail = thisdf3.iloc[-1].wascupfail #2 fail
+EODADWNFail = thisdf3.iloc[-1].wasadwnfail #3 fail
+EODCDWNFail = thisdf3.iloc[-1].wascdwnfail # fail
+
+ACDMacro =0 
 if EODAUPTrue and EODoverAup:
-	ACDMacro=2
+	ACDMacro +=2
 elif EODADWNTrue and EODbelowAdwn:
-	ACDMacro =-2
+	ACDMacro -=2
 elif EODAUPTrue and EODbetweenOR:
-	ACDMacro=0
+	ACDMacro +=0
 elif EODADWNTrue and EODbetweenOR:
-	ACDMacro =-0
+	ACDMacro +=0
 elif EODADWNTrue and EODoverAup and EODCUPTrue:
-	ACDMacro =4
-elif EODAUPTrue and EODunderAdwn and EODCDWNTrue:
-	ACDMacro =-4
+	ACDMacro +=4
+elif EODAUPTrue and EODbelowAdwn and EODCDWNTrue:
+	ACDMacro -=4
 elif EODADWNTrue and EODbetweenOR  and EODCUPTrue:
-	ACDMacro =0
+	ACDMacro =+0
 elif EODAUPTrue and EODbetweenOR and EODCDWNTrue:
-	ACDMacro =0
+	ACDMacro +=0
+elif EODAUPTrue and EODCDWNFail and EODbetweenOR:
+	ACDMacro +=3
+elif EODADWNTrue and EODCUPFail and EODbetweenOR:
+	ACDMacro -=3
+elif EODADWNFail and EODAUPTrue and EODoverAup:
+	ACDMacro +=3
+elif EODADWNFail and EODAUPTrue and EODabovetopOR:
+	ACDMacro +=3
+elif EODAUPFail and EODADWNTrue and EODbetweenOR:
+	ACDMacro -=1	
+elif EODADWNFail and EODAUPTrue and EODbetweenOR:
+	ACDMacro +=1
+elif EODAUPFail  and EODADWNTrue and EODbelowbottomOR:
+ 	ACDMacro -=1
+elif EODADWNFail and EODAUPTrue and EODaboveOR:
+ 	ACDMacro +=1
+elif EODAUPTrue   and EODCDWNFail and EODabovetopOR:
+ 	ACDMacro +=2
+elif EODADWNTrue and EODCUPFail and EODbelowbottomOR:
+	ACDMacro -=2
+else:
+	ACDMacro +=0
 
 
-#print(ACDMacro)
+print(ACDMacro)
 
-outputtocsv = thisdf3[['AUPTrue','timeaboveAup','AUPTrue','AUPTrueTrue','timebelowAdwn','price','profitpos','avgvolume','wasaup','CDWNTrue','CDWNTrueTrue','wascdwn',\
- 'CUPTrue','CUPTrueTrue','wascup','wasaupfail','wasadwnfail','wascupfail','wascudwnfail']].copy()
+outputtocsv = thisdf3[['AUPTrue','timeaboveAup','AUPTrue','AUPTrueTrue','timebelowAdwn','price','profitpos','avgvolume','wasaup','wasadwn','CDWNTrue','CDWNTrueTrue','wascdwn',\
+ 'CUPTrue','CUPTrueTrue','wascup','wasaupfail','wasadwnfail','wascupfail','wascdwnfail']].copy()
 outputtocsv.to_csv('C:/Python37/ACD/output.csv')
 #if wasAup == True and w
 
