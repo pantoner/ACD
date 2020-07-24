@@ -342,8 +342,16 @@ def acdmacroall(tdf,df):
 	#return ACDMacro
 	relativevolume = thisdf.iloc[-1,3] #,"volume10":volume10
 	thisdate = df.iloc[-1,0]
-	datadict = { "date": thisdate,"Aup":[EODAUPTrue],"wascup":EODCUPTrue,"wasadwn":EODADWNTrue,"wascdwn":EODCDWNTrue,"volume10":relativevolume, "avgopeningvolume":avgopeningvolume,\
-	"Aupfail":EODAUPFail,"Cupfail":EODCUPFail,"Adwnfail":EODADWNFail,"Cdwnfail":EODCDWNFail}
-	datadf = pd.DataFrame(datadict)
-	return datadf
+	datadict = { "date": thisdate,"wasaup":[EODAUPTrue],"wascup":EODCUPTrue,"wasadwn":EODADWNTrue,"wascdwn":EODCDWNTrue,"volume10":relativevolume, "avgopeningvolume":avgopeningvolume,\
+	"Aupfail":EODAUPFail,"Cupfail":EODCUPFail,"Adwnfail":EODADWNFail,"Cdwnfail":EODCDWNFail,'betweenOR':EODbetweenOR, "belowbottomOR":EODbelowbottomOR,'abovetopOR':EODabovetopOR,\
+	 "overaup":EODoverAup,"belowadwn":EODbelowAdwn,"aboveOR":EODaboveOR,"belowOR":EODbelowOR }
+	#datadf = pd.DataFrame(datadict)
+	return datadict
 
+	# EODabovetopOR = thisdf3.iloc[-1].EODabovetopOR  # 1 result
+	# EODbelowbottomOR = thisdf3.iloc[-1].EODbelowbottomOR  # 2 result
+	# EODoverAup = thisdf3.iloc[-1].EODoverAup  # 3 result
+	# EODbelowAdwn = thisdf3.iloc[-1].EODbelowAdwn  # 4 result
+	# EODbetweenOR = thisdf3.iloc[-1].EODbetweenOR  # 5 result
+	# EODaboveOR = thisdf3.iloc[-1].EODaboveOR  # 6 result
+	# EODbelowOR = thisdf3.iloc[-1].EODbelowOR 

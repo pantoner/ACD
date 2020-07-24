@@ -9,7 +9,7 @@ from PyQt5.QtMultimediaWidgets import *
 from PyQt5.QtWidgets import QMessageBox
 from io import StringIO
 from tiingo import TiingoClient
-from main3 import Ui_MainWindow
+from main4 import Ui_MainWindow
 import pandas as pd
 import pickle
 import sqlite3
@@ -108,6 +108,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
 		self.lineEditPivotRangeTop.setStyleSheet("color: rgb(0, 0, 0);")
 		self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
+		self.pushButtonAddAlert.setStyleSheet("color: rgb(0, 0, 0);")
 
 
 	def getACD(self):
@@ -411,7 +412,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditOpenRangeHigh.setStyleSheet("color:rgb(0, 0, 0);")
 				self.lineEditPivotRangeBottom.setStyleSheet("color:rgb(0, 0, 0);")
 				self.lineEditAdwn.setStyleSheet("color: rgb(0, 0, 0);")
-				self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
+				self.lineEditAup.setStyleSheet("color: rgb(85, 0, 255);")
+				self.lineEdit10mintdypivot.setStyleSheet("color:rgb(85, 0, 255);")
 
 		except:
 			self.lineEditLastClose.setText(str("not time yet"))
@@ -471,7 +473,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		deleteday = str(self.dateEditDeleteDate.date().day()).zfill(2)
 		deletedict = dict({ 'year': deleteyear , 'month': deletemonth, "day" :deleteday})
 		deletedaystr = str(deletedict['year']+"-"+deletedict['month']+"-"+deletedict['day'])
-
 		symbollistdict = dict({'symbol': [thissymbol],'notes':thisnotes,'deleteday':deletedaystr})
 		symboldf = pd.DataFrame(symbollistdict)
 		conn = sqlite3.connect("symbollistdb.db")
@@ -483,6 +484,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.labelSymbolAccepted.setStyleSheet("color: rgb(0, 170, 127);")
 		self.load_initial_data()
 
+	def addalertsymbol(self):
+		thissymbol = str(self.lineEditSymbol.text())
+		symbollistdict = dict({'symbol': [thissymbol]})
+		symboldf = pd.DataFrame(symbollistdict)
+		conn = sqlite3.connect("alertsymbols.db")
+		symboldf.to_sql('symbols', conn, if_exists='append')
+		#pickle.dump( yesterdaydict, open( "yesterday.p", "wb" ) )
+		self.pushButtonAddAlert.setStyleSheet("color: rgb(0, 170, 127);")
+		print(f"{thissymbol} has been added to alertsymbols")
+
+
 
 	def createmacro(self):
 		self.getmacrothread.start()
@@ -491,7 +503,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 	def retrievemacro(self):
 		# self.retrievemacrothread.start()
 		self.pushButtonRetrieveMacro.setStyleSheet("color: rgb(0, 170, 127);")
-		conn = sqlite3.connect("macroACD2.db")
+		conn = sqlite3.connect("macroACD.db")
 		df = pd.read_sql_query("SELECT * from macro", conn)
 		df = df.drop_duplicates()
 		output =  df.groupby(['symbol'])[['macroACD']].sum()
@@ -516,7 +528,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 	
 	def retrieveoneplot(self):
 		try:
-			conn = sqlite3.connect("macroACD2.db")
+			conn = sqlite3.connect("macroACD.db")
 			df = pd.read_sql_query("SELECT * from macro", conn)
 			df = df.drop_duplicates()
 			df = df.reindex()
@@ -528,7 +540,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			firstmacro =  macro9.iloc[0]
 			#if lastmacro >=5:
 			newdf['threeday'] = newdf['macroACD'].rolling(10).sum()
-			plt.plot(newdf.threeday)
+			plt.plot(newdf.threeday)	
 			plt.ylabel(newdf.index)
 			plt.title((symbol, lastmacro, firstmacro), fontsize=16)
 			plt.show()
@@ -543,59 +555,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		pickle.dump( symboldict , open( "symboldictnow.p", "wb" ) )
 		self.pushButtonMacroCreate.setStyleSheet("color: rgb(0, 170, 127);")
 		self.createonemacrothread.start()   # create thread 
-		# client = TiingoClient({'api_key': "2727ca12f68fce3c489fb8bec1ff67b04d90b307"})
-		# conn2 = sqlite3.connect("macroACD2.db")
-		# # today = pd.datetime.today()
-		# # year = today.year; month = today.month; day =today.day
-		# # today= str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
-		# n=31
-		
-		# macroACD =[]
-		# while n > 0:
-		# 	#try:
-		# 	#thisstartdate = self.getthedate(n)
-		# 	today = pd.datetime.today()
-		# 	thirtydays = today - BDay(n)
-		# 	year = thirtydays.year; month = thirtydays.month; day =thirtydays.day
-		# 	thisstartdate = str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
-			
-		# 	#thirtydaysback = self.getthedate(n + 31)
-		# 	today = pd.datetime.today()
-		# 	thirtydays = today - BDay(n +31)
-		# 	year = thirtydays.year; month = thirtydays.month; day =thirtydays.day
-		# 	thirtydaysback = str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
-
-		# 	#thirtydayenddate = self.getthedate(n +1)
-		# 	today = pd.datetime.today()
-		# 	thirtydays = today - BDay(n +1)
-		# 	year = thirtydays.year; month = thirtydays.month; day =thirtydays.day
-		# 	thirtydayenddate = str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
-
-		# 	today = pd.datetime.today()
-		# 	year = today.year; month = today.month; day =today.day
-		# 	today= str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
-
-		# 	df = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
-		# 		fmt='csv',
-		# 		frequency='1min',
-		# 		startDate= thisstartdate,
-		# 		endDate=thisstartdate)))
-
-		# 	tdf = pd.read_csv(StringIO(client.get_ticker_price(symbolname,   # if empty dataframe you can add one and start over
-		# 		fmt='csv',
-		# 		frequency='daily',
-		# 		startDate= thirtydaysback ,
-		# 		endDate= thirtydayenddate)))
-		# 	try:
-		# 		macroACD.append(acdmacrofunction.acdmacro(tdf,df))
-		# 	except:
-		# 		 n-=1
-		# 		 continue
-		# 	n-=1
-		# print(symbolname)
-		# print(macroACD)
-		# outputdf = pd.DataFrame({'symbol':symbolname,'date':thirtydaysback,'macroACD':macroACD,"thisdate":today})
-		# outputdf.to_sql('macro', conn2, if_exists='append')
 		self.pushButtonMacroCreate.setEnabled(False)
 
 	def getallsymbols(self):
@@ -622,36 +581,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			self.dateEditStart.setEnabled(False);self.dateEditEnd.setEnabled(False);self.checkBoxToday.setEnabled(False)
 			self.pushButtonStop.setEnabled(True);self.pushButtonTickers.setEnabled(False)
 			self.weeklydownloadthread.start()
-	
-	# def getplot():
-	# 	conn = sqlite3.connect("macroACD.db")
-	# 	df = pd.read_sql_query("SELECT * from macro", conn)
-	# 	df = df.drop_duplicates()
-	# 	output =  df.groupby(['symbol'])[['macroACD']].sum()
-	# 	output = output.sort_values('macroACD',ascending = False)
-	# 	#print(output)
-
-	# 	# symbol = 'QDEL'
-
-	# 	df = pd.read_sql_query("SELECT * from macro", conn)
-	# 	df = df.drop_duplicates()
-	# 	df = df.reindex()
-	# 	symbols = list(set(df.symbol.values))
-
-	# 	print(symbols)
-
-	# 	for symbol in symbols:
-	# 		newdf = df.loc[df.symbol == symbol]
-	# 		macro9 = newdf.macroACD.cumsum()
-	# 		lastmacro = macro9.iloc[-1]
-	# 		firstmacro =  macro9.iloc[0]
-	# 		if lastmacro >=5:
-	# 			newdf['threeday'] = newdf['macroACD'].rolling(10).sum()
-	# 			plt.plot(newdf.threeday)
-	# 			plt.ylabel(newdf.index)
-	# 			plt.title((symbol, lastmacro, firstmacro), fontsize=16)
-	# 			plt.show()
-
 
 
 	def resetindicators(self):

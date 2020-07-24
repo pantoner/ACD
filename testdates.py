@@ -25,9 +25,26 @@ conn = sqlite3.connect("alerts.db")
 cur = conn.cursor()
 query = 'DROP TABLE IF EXISTS alert'
 cur.execute(query)
-Adownfailsymbollist = []
+
+Adwnfailsymbollist = []
 Aupfailsymbollist = []
+Cdwnfailsymbollist = []
+Cupfailsymbollist = []
+
 Aupsymbollist = []
+Adwnsymbollist = []
+Cdwnsymbollist = []
+Cupsymbollist = []
+
+belowORsymbollist = []
+aboveORsymbollist = []
+belowadwnsymbollist = []
+overaupsymbollist = []
+abovetopORsymbollist = []
+belowbottomORsymbollist = []
+betweenORsymbollist = []
+
+
 while True:
 	today = pd.datetime.today()
 	year = today.year; month = today.month; day =today.day
@@ -80,61 +97,73 @@ while True:
 			elif outputdf.iloc[0]['Aupfail'] == True and symbolname not in  Aupfailsymbollist:
 				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "A up FAIL", 1)
 				Aupfailsymbollist.append(symbolname)
-			elif outputdf.iloc[0]['Aupfail'] == True and symbolname not in  Aupfailsymbollist:
-				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "A up FAIL", 1)
-				Aupfailsymbollist.append(symbolname)
-			elif outputdf.iloc[0]['Aup'] == True and symbolname not in  Aupsymbollist:
+			elif outputdf.iloc[0]['Cdwnfail'] == True and symbolname not in  Cdwnfailsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "C down FAIL", 1)
+				Cdwnfailsymbollist.append(symbolname)
+			elif outputdf.iloc[0]['Cupfail'] == True and symbolname not in  Cupfailsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "C up FAIL", 1)
+				Cupfailsymbollist.append(symbolname)
+			
+			elif outputdf.iloc[0]['wasaup'] == True and symbolname not in  Aupsymbollist:
 				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "A up", 1)
 				Aupsymbollist.append(symbolname)
+			elif outputdf.iloc[0]['wasadwn'] == True and symbolname not in  Adwnsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "A down", 1)
+				Adwnsymbollist.append(symbolname)
+			elif outputdf.iloc[0]['wascdwn'] == True and symbolname not in  Cdwnsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "C down ", 1)
+				Cdwnsymbollist.append(symbolname)
+			elif outputdf.iloc[0]['wascup'] == True and symbolname not in  Cupsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "C up ", 1)
+				Cupsymbollist.append(symbolname)
+
+			elif outputdf.iloc[0]['belowOR'] == True and symbolname not in  belowORsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "below OR", 1)
+				belowORsymbollist.append(symbolname)
+			elif outputdf.iloc[0]['aboveOR'] == True and symbolname not in  aboveORsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "above OR", 1)
+				aboveORsymbollist.append(symbolname)
+			elif outputdf.iloc[0]['belowadwn'] == True and symbolname not in  belowadwnsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "below A down ", 1)
+				belowadwnsymbollist.append(symbolname)
+			elif outputdf.iloc[0]['overaup'] == True and symbolname not in  overaupsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "over A up ", 1)
+				overaupsymbollist.append(symbolname)
+			elif outputdf.iloc[0]['abovetopOR'] == True and symbolname not in  abovetopORsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "above top OR", 1)
+				abovetopORsymbollist.append(symbolname)
+			elif outputdf.iloc[0]['belowbottomOR'] == True and symbolname not in  belowbottomORsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "below bottom OR ", 1)
+				belowbottomORsymbollist.append(symbolname)
+			elif outputdf.iloc[0]['betweenOR'] == True and symbolname not in  betweenORsymbollist:
+				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "between OR", 1)
+				betweenORsymbollist.append(symbolname)
+
+
 			else:
 				print('nothing happened')
 			n-=1
 	time.sleep(60.0 - ((time.time() - starttime) % 60.0))
-
-
-
-
-	# datadict = { "date": thisdate,"Aup":[EODAUPTrue],"wascup":EODCUPTrue,"wasadwn":EODADWNTrue,"wascdwn":EODCDWNTrue,"volume10":relativevolume, "avgopeningvolume":avgopeningvolume,\
-	# "Aupfail":EODAUPFail,"Cupfail":EODCUPFail,"Adwnfail":EODADWNFail,"Cdwnfail":EODCDWNFail}
-	# datadf = pd.DataFrame(datadict)
-		# print(symbolname)
-		# print(macroACD)
-		# outputdf = pd.DataFrame({'symbol':symbolname,'date':thirtydaysback,'macroACD':macroACD,"thisdate":thisstartdate})
-		# conn2 = sqlite3.connect("macroACD.db")
-		# outputdf.to_sql('macro', conn2, if_exists='append')
-	# today = pd.datetime.today()
-	# year = today.year; month = today.month; day =today.day
-	# todaysdate = str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
-
-	# # thirtydays = today - BDay(30)
-	# thirtydays = today - BDay(n)
-	# year = thirtydays.year; month = thirtydays.month; day =thirtydays.day
-	# thirtydaysback = str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
-	# mystartDate = thirtydaysback
-
-	# def getthedate(n):
-	# 	thirtydays = today - BDay(n)
-	# 	year = thirtydays.year; month = thirtydays.month; day =thirtydays.day
-	# 	thirtydaysback = str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
-	# 	return thirtydaysback
 	
 
-	# mystartDate = thirtydaysback
-	# myendDate = 
-	# #print(todaysdate)
-	# firstday = thirtydaysback
-	# getrange = n + 30
-	# sixtydays = today - BDay(getrange)
+	# 	datadict = { "date": thisdate,"wasaup":[EODAUPTrue],"wascup":EODCUPTrue,"wasadwn":EODADWNTrue,"wascdwn":EODCDWNTrue,"volume10":relativevolume, "avgopeningvolume":avgopeningvolume,\
+	# "Aupfail":EODAUPFail,"Cupfail":EODCUPFail,"Adwnfail":EODADWNFail,"Cdwnfail":EODCDWNFail,'betweenOR':EODbetweenOR, "belowbottomOR":EODbelowbottomOR,'abovetopOR':EODabovetopOR,\
+	#  "overaup":EODoverAup,"belowadwn":EODbelowAdwn,"aboveOR":EODaboveOR,"belowOR":EODbelowOR }
 
-	# year = sixtydays.year; month = sixtydays.month; day =sixtydays.day
-	# sixtydaysback = str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
-	# #print(todaysdate)
-	# print(firstday)
-	# print(sixtydaysback)
-	
+	# EODabovetopOR = thisdf3.iloc[-1].EODabovetopOR  # 1 result
+	# EODbelowbottomOR = thisdf3.iloc[-1].EODbelowbottomOR  # 2 result
+	# EODoverAup = thisdf3.iloc[-1].EODoverAup  # 3 result
+	# EODbelowAdwn = thisdf3.iloc[-1].EODbelowAdwn  # 4 result
+	# EODbetweenOR = thisdf3.iloc[-1].EODbetweenOR  # 5 result
+	# EODaboveOR = thisdf3.iloc[-1].EODaboveOR  # 6 result
+	# EODbelowOR = thisdf3.iloc[-1].EODbelowOR  # 7 result
 
-	# df = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
-	#     fmt='csv',
-	#     frequency='1min',
-	#     startDate= firstday,
-	#     endDate='12-30-2020')))
+	# EODAUPTrue = thisdf3.iloc[-1].wasaup  #1 succss  wasaup AUPTrue
+	# EODCUPTrue = thisdf3.iloc[-1].wascup  #2 success wascup CUPTrue 
+	# EODADWNTrue = thisdf3.iloc[-1].wasadwn#3 success wasadwm  ADWNTrue
+	# EODCDWNTrue = thisdf3.iloc[-1].wascdwn #4 success wascdwn  CDWNTrue
+
+	# EODAUPFail = thisdf3.iloc[-1].wasaupfail #1 fail
+	# EODCUPFail = thisdf3.iloc[-1].wascupfail #2 fail
+	# EODADWNFail = thisdf3.iloc[-1].wasadwnfail #3 fail
+	# EODCDWNFail = thisdf3.iloc[-1].wascdwnfail # fail

@@ -14,7 +14,7 @@ client = TiingoClient({'api_key': "2727ca12f68fce3c489fb8bec1ff67b04d90b307"})
 def getonemacro():
 	symbolpickle = pickle.load( open( "symboldictnow.p", "rb" ) )
 	symbolname = symbolpickle['symbol']
-	conn2 = sqlite3.connect("macroACD2.db")
+	conn2 = sqlite3.connect("macroACD.db")
 	n=31
 	macroACD =[]
 	while n > 0:
