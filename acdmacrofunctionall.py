@@ -13,7 +13,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 def acdmacroall(tdf,df):
 	drange = tdf.high - tdf.low
 	Avalue = drange.values.mean()/5  #20% or 4 = 25%
-
 	n = 0
 	nowrangelist =[]
 	nowvolumelist =[]
@@ -71,15 +70,20 @@ def acdmacroall(tdf,df):
 	thisdf['ADWNTrue'] = thisdf['timebelowAdwn'].rolling(10).sum()
 	thisdf['ADWNTrueTrue'] = thisdf['timebelowAdwn'].cumsum()
 	#print(thisdf.columns)
-
-
+	thisdf.to_csv('seethisdata.csv')
+	# output is timeofaup
 	n= 0
 	wasauplist=[]
 	output = []
+	sentinal = 0
+	timeofaup = {'timeofaup':[0]}
 	# def wasaupfunc(thisdf):
 	while n < len(thisdf):
 		if thisdf.loc[n,'AUPTrue'] >9:
 			wasauplist.append(1)
+			if sentinal == 0:
+				sentinal +=1
+				timeofaup.update({"timeofaup": [df.loc[n,"date"]], "relativevolume": thisdf.loc[n,'avgvolume']})
 		else:
 			wasauplist.append(0)
 		if sum(wasauplist) == 0:
@@ -100,10 +104,15 @@ def acdmacroall(tdf,df):
 	n= 0
 	wasadwnlist=[]
 	output = []
+	sentinal = 0
+	timeofadwn = {'timeofadwn':[0]}
 	# def wasaupfunc(thisdf):
 	while n < len(thisdf2):
 		if thisdf2.loc[n,'ADWNTrue'] >9:
 			wasadwnlist.append(1)
+			if sentinal == 0:
+				sentinal +=1
+				timeofadwn.update({"timeofadwn": [df.loc[n,"date"]], "relativevolume": thisdf.loc[n,'avgvolume']})
 		else:
 			wasadwnlist.append(0)
 		if sum(wasadwnlist) == 0:
@@ -131,10 +140,16 @@ def acdmacroall(tdf,df):
 	n= 0
 	wascdwnlist=[]
 	output = []
+	sentinal = 0
+	timeofcdwn = {'timeofcdwn':[0]}
+
 	# def wasaupfunc(thisdf):
 	while n < len(thisdf3):
 		if thisdf3.loc[n,'CDWNTrue'] >9:
 			wascdwnlist.append(1)
+			if sentinal == 0:
+				sentinal +=1
+				timeofcdwn.update({"timeofcdwn": [df.loc[n,"date"]], "relativevolume": thisdf.loc[n,'avgvolume']})
 		else:
 			wascdwnlist.append(0)
 		if sum(wascdwnlist) == 0:
@@ -154,10 +169,15 @@ def acdmacroall(tdf,df):
 	n= 0
 	wascuplist=[]
 	output = []
+	sentinal = 0
+	timeofcup = {'timeofcup':[0]}
 	# def wasaupfunc(thisdf):
 	while n < len(thisdf3):
 		if thisdf3.loc[n,'CUPTrue'] >9:
 			wascuplist.append(1)
+			if sentinal == 0:
+				sentinal +=1
+				timeofcup.update({"timeofcup": [df.loc[n,"date"]], "relativevolume": thisdf.loc[n,'avgvolume']})
 		else:
 			wascuplist.append(0)
 		if sum(wascuplist) == 0:
@@ -174,6 +194,8 @@ def acdmacroall(tdf,df):
 	thistimeaboveaup = False
 	thistimeauptrue = 1
 	AUPfail = []
+	sentinal = 0
+	timeofaupfail = {'timeofaupfail':[0]}
 	n=0
 	while n < len(thisdf3):
 		if thisdf3.loc[n,'timeaboveAup'] == True:
@@ -186,6 +208,9 @@ def acdmacroall(tdf,df):
 			thistimeauptrue = thistimeauptrue 
 		if thistimeaboveaup == True and thistimeauptrue == 0:
 			AUPfail.append(True)
+			if sentinal == 0:
+				sentinal +=1
+				timeofaupfail.update({"timeofaupfail": [df.loc[n,"date"]], "relativevolume": thisdf.loc[n,'avgvolume']})
 		else:
 			AUPfail.append(False)
 		n +=1
@@ -197,6 +222,8 @@ def acdmacroall(tdf,df):
 	thistimebelowadwn = False
 	thistimeadwntrue = 1
 	ADWNfail = []
+	sentinal = 0
+	timeofadwnfail = {'timeofadwnfail':[0]}
 	n=0
 	while n < len(thisdf3):
 		if thisdf3.loc[n,'timebelowAdwn'] == True:
@@ -204,11 +231,14 @@ def acdmacroall(tdf,df):
 		else:
 			thistimebelowadwn = thistimebelowadwn
 		if thisdf3.loc[n,'ADWNTrue'] == 0 and thistimebelowadwn == True:
-			tthistimeadwntrue  = 0
+			thistimeadwntrue  = 0
 		else:
 			thistimeadwntrue = thistimeadwntrue 
 		if thistimebelowadwn == True and thistimeadwntrue == 0:
 			ADWNfail.append(True)
+			if sentinal == 0:
+				sentinal +=1
+				timeofadwnfail.update({"timeofadwnfail": [df.loc[n,"date"]], "relativevolume": thisdf.loc[n,'avgvolume']})
 		else:
 			ADWNfail.append(False)
 		n +=1
@@ -219,6 +249,8 @@ def acdmacroall(tdf,df):
 	thistimeabovecup = False
 	thistimecuptrue = 1
 	CUPfail = []
+	sentinal = 0
+	timeofcupfail = {'timeofcupfail':[0]}
 	n=0
 	while n < len(thisdf3):
 		if thisdf3.loc[n,'timeaboveCup'] == True:
@@ -231,6 +263,9 @@ def acdmacroall(tdf,df):
 			thistimecuptrue = thistimecuptrue 
 		if thistimeabovecup == True and thistimecuptrue == 0:
 			CUPfail.append(True)
+			if sentinal == 0:
+				sentinal +=1
+				timeofcupfail.update({"timeofcupfail": [df.loc[n,"date"]], "relativevolume": thisdf.loc[n,'avgvolume']})
 		else:
 			CUPfail.append(False)
 		n +=1
@@ -241,6 +276,8 @@ def acdmacroall(tdf,df):
 	thistimebelowcdwn = False
 	thistimecdwntrue = 1
 	CDWNfail = []
+	sentinal = 0
+	timeofcdwnfail = {'timeofcdwnfail':[0]}
 	n=0
 	while n < len(thisdf3):
 		if thisdf3.loc[n,'timebelowCdwn'] == True:
@@ -253,6 +290,9 @@ def acdmacroall(tdf,df):
 			thistimecdwntrue = thistimecdwntrue 
 		if thistimebelowcdwn == True and thistimecdwntrue == 0:
 			CDWNfail.append(True)
+			if sentinal == 0:
+				sentinal +=1
+				timeofcdwnfail.update({"timeofcdwnfail": [df.loc[n,"date"]], "relativevolume": thisdf.loc[n,'avgvolume']})
 		else:
 			CDWNfail.append(False)
 		n +=1
@@ -265,13 +305,14 @@ def acdmacroall(tdf,df):
 	# # end of day 
 
 
+
 	thisdf3['EODoverAup'] = thisdf3.apply(lambda x: x['price'] >= Aup, axis=1)  #just like left_indexe 88
 	thisdf3['EODbelowAdwn'] = thisdf3.apply(lambda x: x['price'] <= Adwn, axis=1)  #just like line 88
 	thisdf3['EODbetweenOR'] = thisdf3.apply(lambda x: x['price'] >= openrangelow and x['price'] <= openrangehigh, axis=1)  #just like line 88
-	thisdf3['EODaboveOR'] = thisdf3.apply(lambda x: x['price'] > openrangelow, axis=1)  #just like line 88
-	thisdf3['EODbelowOR'] = thisdf3.apply(lambda x: x['price'] < openrangehigh, axis=1)  #just like line 88
-	thisdf3['EODabovetopOR'] = thisdf3.apply(lambda x: x['price'] > openrangehigh, axis=1)  #just like line 88
-	thisdf3['EODbelowbottomOR'] = thisdf3.apply(lambda x: x['price'] < openrangelow, axis=1)  #just like line 88
+	thisdf3['EODaboveOR'] = thisdf3.apply(lambda x: x['price'] >= openrangelow and x['price'] < Aup, axis=1)  #just like line 88
+	thisdf3['EODbelowOR'] = thisdf3.apply(lambda x: x['price'] <= openrangehigh and x['price'] > Adwn, axis=1)  #just like line 88
+	thisdf3['EODabovetopOR'] = thisdf3.apply(lambda x: x['price'] >= openrangehigh and x['price'] < Aup, axis=1)  #just like line 88
+	thisdf3['EODbelowbottomOR'] = thisdf3.apply(lambda x: x['price'] <= openrangelow and x['price'] > Adwn, axis=1)  #just like line 88
 
 	wascupdf = pd.DataFrame({'wascup':output})
 	thisdf3 = pd.merge(thisdf3,wascupdf, how='left',left_index=True,right_index=True)
@@ -341,12 +382,20 @@ def acdmacroall(tdf,df):
 	#print(ACDMacro)
 	#return ACDMacro
 	relativevolume = thisdf.iloc[-1,3] #,"volume10":volume10
+	print(timeofaup)
+	# aupdf = pd.DataFrame(timeofaup)
+	# conn5 = sqlite3.connect("todaysevents.db")
+	# if aupdf['timeofaup'].any() != 0:
+	# 	aupdf = aupdf[aupdf['timeofaup']!= 0]
+	# 	aupdf.to_sql('aup', conn5, if_exists='append')
+	# 	print(aupdf)
+	
 	thisdate = df.iloc[-1,0]
 	datadict = { "date": thisdate,"wasaup":[EODAUPTrue],"wascup":EODCUPTrue,"wasadwn":EODADWNTrue,"wascdwn":EODCDWNTrue,"volume10":relativevolume, "avgopeningvolume":avgopeningvolume,\
 	"Aupfail":EODAUPFail,"Cupfail":EODCUPFail,"Adwnfail":EODADWNFail,"Cdwnfail":EODCDWNFail,'betweenOR':EODbetweenOR, "belowbottomOR":EODbelowbottomOR,'abovetopOR':EODabovetopOR,\
-	 "overaup":EODoverAup,"belowadwn":EODbelowAdwn,"aboveOR":EODaboveOR,"belowOR":EODbelowOR }
+	 "overaup":EODoverAup,"belowadwn":EODbelowAdwn,"aboveOR":EODaboveOR,"belowOR":EODbelowOR}
 	#datadf = pd.DataFrame(datadict)
-	return datadict
+	return ([datadict,timeofaup,timeofadwn,timeofcdwn,timeofcup,timeofaupfail,timeofadwnfail,timeofcdwnfail,timeofcupfail])
 
 	# EODabovetopOR = thisdf3.iloc[-1].EODabovetopOR  # 1 result
 	# EODbelowbottomOR = thisdf3.iloc[-1].EODbelowbottomOR  # 2 result

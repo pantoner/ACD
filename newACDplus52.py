@@ -6,23 +6,12 @@ import pickle
 import config
 
 client = TiingoClient({'api_key': "2727ca12f68fce3c489fb8bec1ff67b04d90b307"})
-# today = '07-15-2020'
-# yesterday = "07-14-2020"
-# start = "06-03-2020"
-# symbols =['TBIO','DBX','ASMB','QDEL','KDP','PFSI','FTNT','LVGO','ALTM','AGLE','HAIN','NOMD','EIGR','AAWW','CNST','AWK','PVG','SRPT','CENTA','FSLY','LGND','ADTN','REAL','ATRA','AEIS',\
-# 'FVRR','W','OSB','ABC','ENR','CLVS','BGS','LOPE','EXPI','GNMK','ACIA','KLAC','CHGG','TREX','CLX','PBFX','BAH','BERY','MPWR','FORM','BAND','HOLX','YUMC','PB','APAM','SPGI','DHI','GCAP',\
-# 'VLY','DTE','SLGN','CALX','FNF','ETSY','BIDU','AA','STLD','IRBT','TMO','CLGX','DGX','NUE','TPX','WTER','TACO','MXL','TPB','HUN','SHW','PKI','MXIM','SBH','CRTO','FORM','ZYXI','RYI','PTC',\
-# 'MAS','SAH','XLNX','QDEL','FRTA','LMNX','INMD','VCEL','MATX','NUS','GDDY','PCRX','HIMX','KOP','HEAR','LVGO','KINS','AXNX','FSCT','VERI','XP','MTBC','BLFS','WYY','PRCP','ADS','TBBK','VRSN',\
-# 'PB','BLKB','BAH','MGP','WES','HEP','CIM','NDLS','CQP','CWK','DBX','G','UTI','VGR','AVYA','NBLX','ET','RICK','SUN','TAK','VVI','VMW','AEO','GIII','CIEN','ZUMZ','GCO','PRGS','AUY','NFLX','BLK',\
-# 'SMPL','SNX','RAD','VIPS','DOYU','SINA','EQX','SSRM','JD','ETRN','CELH','HEAR','NTDOY','FOCS','ABBV']
 
 def plus5():
-# 	symbollist =['TBIO','DBX','ASMB','QDEL','KDP','PFSI','FTNT','LVGO','ALTM','AGLE','HAIN','NOMD','EIGR','AAWW','CNST','AWK','PVG','SRPT','CENTA','FSLY','LGND','ADTN','REAL','ATRA','AEIS',\
-# 	'FVRR','W','OSB','ABC','ENR','CLVS','BGS','LOPE','EXPI','GNMK','ACIA','KLAC','CHGG','TREX','CLX','PBFX','BAH','BERY','MPWR','FORM','BAND','HOLX','YUMC','PB','APAM','SPGI','DHI','GCAP',\
-# 	'VLY','DTE','SLGN','CALX','FNF','ETSY','BIDU','AA','STLD','IRBT','TMO','CLGX','DGX','NUE','TPX','WTER','TACO','MXL','TPB','HUN','SHW','PKI','MXIM','SBH','CRTO','FORM','ZYXI','RYI','PTC',\
-# 	'MAS','SAH','XLNX','QDEL','FRTA','LMNX','INMD','VCEL','MATX','NUS','GDDY','PCRX','HIMX','KOP','HEAR','LVGO','KINS','AXNX','FSCT','VERI','XP','MTBC','BLFS','WYY','PRCP','ADS','TBBK','VRSN',\
-# 	'PB','BLKB','BAH','MGP','WES','HEP','CIM','NDLS','CQP','CWK','DBX','G','UTI','VGR','AVYA','NBLX','ET','RICK','SUN','TAK','VVI','VMW','AEO','GIII','CIEN','ZUMZ','GCO','PRGS','AUY','NFLX','BLK',\
-# 	'SMPL','SNX','RAD','VIPS','DOYU','SINA','EQX','SSRM','JD','ETRN','CELH','HEAR','NTDOY','FOCS','ABBV']
+	conn2 = sqlite3.connect("Plus5Earningsdb.db")
+	cur2 = conn2.cursor()
+	query2 = 'DROP TABLE IF EXISTS range'
+	cur2.execute(query2)
 
 	conn = sqlite3.connect("symbollistdb.db")
 	cur = conn.cursor()
@@ -42,14 +31,14 @@ def plus5():
 		yesterday = str(yesterday['year']+"-"+yesterday['month']+"-"+yesterday['day'])
 		today = str(today['year']+"-"+today['month']+"-"+today['day'])
 		start = str(start['year']+"-"+start['month']+"-"+start['day'])
-
-
-		df = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
-			fmt='csv',
-			frequency='20Min',
-			startDate= today,
-			endDate='12-30-2020')))
 		try: 
+
+			df = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
+				fmt='csv',
+				frequency='20Min',
+				startDate= today,
+				endDate='12-30-2020')))
+		
 			openrangehigh = round(df.iloc[0, 2],2)
 			openrangelow = round(df.iloc[0, 3],2)
 
@@ -94,15 +83,15 @@ def plus5():
 			"Aup":Aup,"Adwn":Adwn,"momentum":momentum1}
 			outputdf = pd.DataFrame(output)
 
-			conn = sqlite3.connect("Plus5Earningsdb.db")
-			outputdf.to_sql('range', conn, if_exists='append')
+			conn2 = sqlite3.connect("Plus5Earningsdb.db")
+			outputdf.to_sql('range', conn2, if_exists='append')
 			# cur = conn.cursor()
 		 #    cur.execute("SELECT * FROM range WHERE symbol=?", ("T",))
 		 #    rows = cur.fetchall()
 
 		 #    for row in rows:
 		 #        print(row)
-			df = pd.read_sql_query("SELECT * from range", conn)
+			df = pd.read_sql_query("SELECT * from range", conn2)
 
 			print(df)
 		except:

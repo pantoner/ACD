@@ -28,9 +28,10 @@ from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
-def addalertline(failure,top,now):
+def addalertline(failure,top,now,symbol):
 
 	fig2 = plt.figure(constrained_layout=True)
+	fig2.canvas.set_window_title(symbol)
 	spec2 = gridspec.GridSpec(ncols=1, nrows=5, figure=fig2)
 	f2_ax1 = fig2.add_subplot(spec2[0, 0])
 	f2_ax2 = fig2.add_subplot(spec2[1, 0])
@@ -95,7 +96,7 @@ def addalertline(failure,top,now):
 	if now == 3:
 		f2_ax3.set_facecolor('green')
 	if now == 4:
-		f2_ax5.set_facecolor('green')
+		f2_ax4.set_facecolor('green')
 	if now == 5:
 		f2_ax5.set_facecolor('green')
 	if now == 6:

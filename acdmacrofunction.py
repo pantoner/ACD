@@ -268,10 +268,10 @@ def acdmacro(tdf,df):
 	thisdf3['EODoverAup'] = thisdf3.apply(lambda x: x['price'] >= Aup, axis=1)  #just like left_indexe 88
 	thisdf3['EODbelowAdwn'] = thisdf3.apply(lambda x: x['price'] <= Adwn, axis=1)  #just like line 88
 	thisdf3['EODbetweenOR'] = thisdf3.apply(lambda x: x['price'] >= openrangelow and x['price'] <= openrangehigh, axis=1)  #just like line 88
-	thisdf3['EODaboveOR'] = thisdf3.apply(lambda x: x['price'] > openrangelow, axis=1)  #just like line 88
-	thisdf3['EODbelowOR'] = thisdf3.apply(lambda x: x['price'] < openrangehigh, axis=1)  #just like line 88
-	thisdf3['EODabovetopOR'] = thisdf3.apply(lambda x: x['price'] > openrangehigh, axis=1)  #just like line 88
-	thisdf3['EODbelowbottomOR'] = thisdf3.apply(lambda x: x['price'] < openrangelow, axis=1)  #just like line 88
+	thisdf3['EODaboveOR'] = thisdf3.apply(lambda x: x['price'] >= openrangelow and x['price'] < Aup, axis=1)  #just like line 88
+	thisdf3['EODbelowOR'] = thisdf3.apply(lambda x: x['price'] <= openrangehigh and x['price'] > Adwn, axis=1)  #just like line 88
+	thisdf3['EODabovetopOR'] = thisdf3.apply(lambda x: x['price'] >= openrangehigh and x['price'] < Aup, axis=1)  #just like line 88
+	thisdf3['EODbelowbottomOR'] = thisdf3.apply(lambda x: x['price'] <= openrangelow and x['price'] > Adwn, axis=1)  
 
 	wascupdf = pd.DataFrame({'wascup':output})
 	thisdf3 = pd.merge(thisdf3,wascupdf, how='left',left_index=True,right_index=True)
