@@ -9,12 +9,13 @@ from PyQt5.QtMultimediaWidgets import *
 from PyQt5.QtWidgets import QMessageBox
 from io import StringIO
 from tiingo import TiingoClient
-from main4 import Ui_MainWindow
+from main6 import Ui_MainWindow
 import pandas as pd
 import pickle
 import sqlite3
 from datetime import datetime
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
 from pandas.tseries.offsets import BDay
 # import algos
 # import paramind
@@ -36,6 +37,7 @@ import getalertsBulkowski
 import getMacroDaily
 import acdmacrofunction
 import createonemacro
+import getminalertdata
 #import macroACDfinalUI
 import volume
 import config
@@ -93,8 +95,163 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.bulkowskialertsthread = bulkowskialertsThread()
 		self.getmacrothread  = getmacroThread()
 		self.createonemacrothread = createonemacroThread()
+		self.getminalertdatathread = getminalertdataThread()
 		#self.retrievemacrothread = retrievemacroThread()
  
+	def addalertline(self,failure,top,now,symbol):
+
+		fig2 = plt.figure(constrained_layout=True)
+		fig2.canvas.set_window_title(symbol)
+		spec2 = gridspec.GridSpec(ncols=1, nrows=5, figure=fig2)
+		f2_ax1 = fig2.add_subplot(spec2[0, 0])
+		f2_ax2 = fig2.add_subplot(spec2[1, 0])
+		f2_ax3 = fig2.add_subplot(spec2[2, 0])
+		f2_ax4 = fig2.add_subplot(spec2[3, 0])
+		f2_ax5 = fig2.add_subplot(spec2[4, 0])
+
+
+		f2_ax1.get_xaxis().set_ticks([])
+		f2_ax1.get_yaxis().set_ticks([])
+		f2_ax2.get_xaxis().set_ticks([])
+		f2_ax2.get_yaxis().set_ticks([])
+		f2_ax3.get_xaxis().set_ticks([])
+		f2_ax3.get_yaxis().set_ticks([])
+		f2_ax4.get_xaxis().set_ticks([])
+		f2_ax4.get_yaxis().set_ticks([])
+		f2_ax5.get_xaxis().set_ticks([])
+		f2_ax5.get_yaxis().set_ticks([])
+
+		if failure == 1:
+			f2_ax1.axhline(y=0.25, color='r', linestyle='-')
+			f2_ax1.axhline(y=0.5, color='r', linestyle='-')
+			f2_ax1.axhline(y=1, color='r', linestyle='-')
+			f2_ax1.axhline(y=0.75, color='r', linestyle='-')
+
+		if failure == 5:
+			f2_ax5.axhline(y=0.25, color='r', linestyle='-')
+			f2_ax5.axhline(y=0.5, color='r', linestyle='-')
+			f2_ax5.axhline(y=1, color='r', linestyle='-')
+			f2_ax5.axhline(y=0.75, color='r', linestyle='-')
+
+		if failure == 6:
+			f2_ax5.axhline(y=0.25, color='r', linestyle='-')
+			f2_ax5.axhline(y=0.5, color='r', linestyle='-')
+			f2_ax5.axhline(y=1, color='r', linestyle='-')
+			f2_ax5.axhline(y=0.75, color='r', linestyle='-')
+
+			f2_ax1.axhline(y=0.25, color='r', linestyle='-')
+			f2_ax1.axhline(y=0.5, color='r', linestyle='-')
+			f2_ax1.axhline(y=1, color='r', linestyle='-')
+			f2_ax1.axhline(y=0.75, color='r', linestyle='-')
+
+		if top == 'cup':
+			f2_ax1.set_facecolor('lightblue')
+		if top == 'cdwn':
+			f2_ax5.set_facecolor('lightblue')
+		if top == 'aup':
+			f2_ax1.set_facecolor('lightgreen')
+		if top == 'adwn':
+			f2_ax5.set_facecolor('lightgreen')
+		if top == 'cupadwn':
+			f2_ax1.set_facecolor('lightblue')
+			f2_ax5.set_facecolor('lightgreen')
+		if top == 'cdwnaup':
+			f2_ax5.set_facecolor('lightblue')
+			f2_ax1.set_facecolor('lightgreen')
+
+		if now == 1:
+			f2_ax1.set_facecolor('green')
+		if now == 2:
+			f2_ax2.set_facecolor('green')
+		if now == 3:
+			f2_ax3.set_facecolor('green')
+		if now == 4:
+			f2_ax5.set_facecolor('green')
+		if now == 5:
+			f2_ax5.set_facecolor('green')
+		if now == 6:
+			f2_ax1.set_facecolor('blue')
+		if now == 7:
+			f2_ax5.set_facecolor('blue')
+		plt.show()
+
+	def getthisplot(self):
+		conn = sqlite3.connect("alertsymbols.db")
+		df= pd.read_sql_query("select * from symbols;", conn)
+		symbollist = df['symbol'].tolist()
+		print(symbollist)
+		for symbol in symbollist:
+			for i in range(100):
+				for attempt in range(10):
+					try:
+				      	conn3 = sqlite3.connect("alerts.db")
+						df= pd.read_sql_query("select * from alert;", conn3)
+				    except:
+				      	conn3 = sqlite3.connect("alerts.db")
+						df= pd.read_sql_query("select * from alert;", conn3)
+				    else:
+				      break
+				else:
+					continue
+			# try:
+			# 	conn3 = sqlite3.connect("alerts.db")
+			# 	df= pd.read_sql_query("select * from alert2;", conn3)
+			# except:
+			# 	conn3 = sqlite3.connect("alerts.db")
+			# 	df= pd.read_sql_query("select * from alert;", conn3)
+
+			thisdf = df[df.symbol == symbol]
+
+			fail = 0
+			if thisdf.Aupfail.all() == True:
+				fail = 1
+			elif thisdf.Adwnfail.all() == True:
+				fail = 5
+			elif thisdf.Cdwnfail.all() == True:
+				fail = 5
+			elif thisdf.Cupfail.all() == True:
+				fail = 1
+			elif thisdf.Aupfail.all() + thisdf.Adwnfail.all() + thisdf.Cupfail.all() + thisdf.Cdwnfail.all() == 2:
+				fail = 6
+
+			top = 0
+			if thisdf.wasaup.all() == True:
+				top = 'aup'
+			elif thisdf.wasadwn.all() == True:
+				top = 'adwn'
+			elif thisdf.wascup.all() == True:
+				top = 'cdwn'
+			elif thisdf.wascdwn.all() == True:
+				top = 'cdwn'
+			elif thisdf.wascup.all() == True and thisdf.wasadwn.all() == True:
+				top = 'cupadwn'
+			elif thisdf.wascdwn.all() == True and thisdf.wasaup.all() == True:
+				top = 'cdwnaup'
+
+			now = 0
+
+			if thisdf.overaup.all() == True:
+				now = 1
+			elif thisdf.abovetopOR.all() == True:
+				now = 2
+			elif thisdf.betweenOR.all() == True:
+				now = 3
+			elif thisdf.belowbottomOR.all() == True:
+				now = 4
+			elif thisdf.belowadwn.all() == True:
+				now = 5
+			elif thisdf.belowadwn.all() == True and thisdf.wascdwn.all() == True:
+				now = 7
+			elif thisdf.overaup.all() == True and thisdf.wascup.all() == True:
+				now = 6
+
+			# failure = 0
+			# top = 'cdwnaup'
+			# now = 7
+			print(symbol)
+			#alertsMap.addalertline(fail,top,now,symbol)
+			self.addalertline(fail,top,now,symbol)
+
 	def highup(self):
 		self.lineEditAup.setStyleSheet("color: rgb(255, 255, 0);")
 		self.lineEditOpenRangeLow.setStyleSheet("color:rgb(85, 0, 255);")
@@ -110,9 +267,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
 		self.pushButtonAddAlert.setStyleSheet("color: rgb(0, 0, 0);")
 
+	def getevents(self):
+		conn2 = sqlite3.connect("thissymbolsevents.db")
+		cur2 = conn2.cursor()
+		query = 'DROP TABLE IF EXISTS events'
+		cur2.execute(query)
+
+		symbol = str(self.lineEditSymbol.text())
+		conn = sqlite3.connect("todaysevents.db")
+		df= pd.read_sql_query("select * from aup;", conn)
+		df = df.loc[df['symbol'] ==symbol]
+
+
+		print(df)
+		if not df.empty:
+			thistime =df.timeofaup.items
+			thistime = df['timeofaup'].values[0]
+			hour = thistime[11:14]
+			minutes = thistime[14:16]
+			thisauptime = hour+minutes
+			thisdict = {'event':'aup','thistime': [thisauptime]}
+			thisdf = pd.DataFrame(thisdict)
+			thisdf.to_sql('events', conn2, if_exists='append')
+			self.load_event_data()
+		else:
+			self.tableWidgetEvent.setRowCount(0);
+
 
 	def getACD(self):
+		self.getevents()
 		self.resetcolor()
+
 		if os.path.exists("yesterday.p"):
 			os.remove("yesterday.p")
 
@@ -129,7 +314,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		#theurl = f"https://stockcharts.com/h-sc/ui?s={symbol}"
 		print(theurl)
 		self.labelSymbol.setText(f"<a href= {theurl} >{symbol} Link</a>");
-		
+
+		self.labelTodayDate.setOpenExternalLinks(True);
+		theurl2 = f"https://www.barchart.com/stocks/quotes/{symbol}/interactive-chart"
+		#theurl = f"https://stockcharts.com/h-sc/ui?s={symbol}"
+		print(theurl2)
+		self.labelTodayDate.setText(f"<a href= {theurl2} >{symbol} Chart</a>");
+
 
 		yesterdayyear = str(self.dateEditYesterday.date().year())
 		yesterdaymonth = str(self.dateEditYesterday.date().month()).zfill(2)
@@ -446,6 +637,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.bulkowskialertsthread.start()
 		self.pushButtonBulkowskiAlerts.setStyleSheet("color: rgb(0, 170, 127);")
 
+	def getminalertdata(self):
+		self.getminalertdatathread.start()
+		self.pushButtongetminalertdata.setStyleSheet("color: rgb(0, 170, 127);")
+
 	def load_initial_data(self):
 		# where c is the cursor
 		self.tableWidget.setRowCount(0)
@@ -454,7 +649,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		query = 'SELECT * FROM symbols'
 		cur.execute(query)
 		rows = cur.fetchall()
-
+		
 		for row in rows:
 			inx = rows.index(row)
 			self.tableWidget.insertRow(inx)
@@ -462,6 +657,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			self.tableWidget.setItem(inx, 0, QTableWidgetItem(row[1]))
 			self.tableWidget.setItem(inx, 1, QTableWidgetItem(row[2]))
 			self.tableWidget.setItem(inx, 2, QTableWidgetItem(row[3]))
+
+	def load_event_data(self):
+		# where c is the cursor
+		self.tableWidgetEvent.setRowCount(0)
+		conn = sqlite3.connect("thissymbolsevents.db")
+		cur = conn.cursor()
+		query = 'SELECT * FROM events'
+		cur.execute(query)
+		rows = cur.fetchall()
+		
+		for row in rows:
+			inx = rows.index(row)
+			self.tableWidgetEvent.insertRow(inx)
+			# add more if there is more columns in the database.
+			self.tableWidgetEvent.setItem(inx, 0, QTableWidgetItem(row[1]))
+			self.tableWidgetEvent.setItem(inx, 1, QTableWidgetItem(row[2]))
+			#self.tableWidget.setItem(inx, 2, QTableWidgetItem(row[3]))
 
 
 	def addsymbols(self):
@@ -892,6 +1104,15 @@ class bulkowskialertsThread(QThread):
 		getalertsBulkowski.patternAup()
 		#getalertsdwn5plus.fiveplusAdwn()
 
+class getminalertdataThread(QThread):
+	signal = pyqtSignal('PyQt_PyObject')
+	def __init__(self):
+		QThread.__init__(self)  
+
+	def run(self):
+		#try:
+		getminalertdata.buildminutealerts()
+		#getalertsdwn5plus.fiveplusAdwn()
 
 
 class getmacroThread(QThread):

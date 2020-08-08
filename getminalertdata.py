@@ -50,36 +50,38 @@ def buildminutealerts():
 		df= pd.read_sql_query("select * from symbols;", conn3)
 		symbollist = df['symbol'].tolist()
 		print(symbollist)
-		try:
-			for symbol in symbollist:
-				#print(symbol)
-				
-				thirtydaysback = getthedate(1)
-				#thirtydaysback = "2020-07-23"
-				thirtydayenddate = getthedate(31)
-				#thirtydayenddate = "2020-06-11"
-				for attempt in range(10):
-					try: 
-						df = pd.read_csv(StringIO(client.get_ticker_price(symbol,
-							fmt='csv',
-							frequency='1min',
-							startDate= today,
-							endDate=today)))
-						print(df.columns)
-						tdf = pd.read_csv(StringIO(client.get_ticker_price(symbol,   # if empty dataframe you can add one and start over
-							fmt='csv',
-							frequency='daily',
-							startDate= thirtydayenddate ,
-							endDate= thirtydaysback)))
-					except:
-						print(f'failed {symbol}')
-					else:
-						break
+		#try:
+		for symbol in symbollist:
+			#print(symbol)
+			
+			thirtydaysback = getthedate(1)
+			#thirtydaysback = "2020-07-23"
+			thirtydayenddate = getthedate(31)
+			#thirtydayenddate = "2020-06-11"
+			for attempt in range(10):
+				try: 
+					df = pd.read_csv(StringIO(client.get_ticker_price(symbol,
+						fmt='csv',
+						frequency='1min',
+						startDate= today,
+						endDate=today)))
+					print(df.columns)
+					tdf = pd.read_csv(StringIO(client.get_ticker_price(symbol,   # if empty dataframe you can add one and start over
+						fmt='csv',
+						frequency='daily',
+						startDate= thirtydayenddate ,
+						endDate= thirtydaysback)))
+				except:
+					print(f'failed {symbol}')
 				else:
-					continue
+					break
+			else:
+				continue
 
-					#print(tdf)
-				#try:
+				#print(tdf)
+			#try:
+			print(symbol)
+			try:
 				outputdict = acdmacrofunctionall.acdmacroall(tdf,df)
 				print(outputdict)
 				outputdf = pd.DataFrame(outputdict[0])
@@ -139,30 +141,32 @@ def buildminutealerts():
 				timeofcupfail = 'timeofcupfail'
 				cupfail='cupfail'
 				addindicator(cupfaildf,timeofcupfail,cupfail,indexquery,symbol)
+			except:
+				pass
 
-				# except:
-				# 	continue
+			# except:
+			# 	continue
 
 
-				# if aupdf['timeofaup'].any() != 0:
-				# 	aupdf = aupdf[aupdf['timeofaup']!= 0]
-				# 	aupdf['symbol'] = symbol
-				# 	try:
-				# 		indexquery = 'CREATE UNIQUE INDEX index_symbol_and_timeofaup_on_aup ON aup(symbol, timeofaup);'
-				# 		conn5 = sqlite3.connect("todaysevents.db")
-				# 		aupdf.to_sql('aup', conn5, if_exists='append')
-				# 		pd.read_sql_query(indexquery, conn5)
-				# 	except:
-				# 		print('no rewrite allowed')
-				# 	print(aupdf)
-			querynew = 'CREATE TABLE alert2 AS  SELECT *  FROM alert'
-			query3 = 'DROP TABLE IF EXISTS alert2'
-			cur2 = conn.cursor()
-			cur2.execute(query3)
-			cur2.execute(querynew)
-			conn5.close();conn.close()
-		except:
-			continue
+			# if aupdf['timeofaup'].any() != 0:
+			# 	aupdf = aupdf[aupdf['timeofaup']!= 0]
+			# 	aupdf['symbol'] = symbol
+			# 	try:
+			# 		indexquery = 'CREATE UNIQUE INDEX index_symbol_and_timeofaup_on_aup ON aup(symbol, timeofaup);'
+			# 		conn5 = sqlite3.connect("todaysevents.db")
+			# 		aupdf.to_sql('aup', conn5, if_exists='append')
+			# 		pd.read_sql_query(indexquery, conn5)
+			# 	except:
+			# 		print('no rewrite allowed')
+			# 	print(aupdf)
+		# query3 = 'DROP TABLE IF EXISTS alert2'
+		# querynew = 'CREATE TABLE alert2 AS  SELECT *  FROM alert'
+		# cur2 = conn.cursor()
+		# cur2.execute(query3)
+		# cur2.execute(querynew)
+		conn5.close();conn.close()
+		# except:
+		# 	continue
 
 		time.sleep(60.0 - ((time.time() - starttime) % 60.0))
 buildminutealerts()

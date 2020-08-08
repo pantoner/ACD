@@ -389,7 +389,11 @@ def acdmacroall(tdf,df):
 	# 	aupdf = aupdf[aupdf['timeofaup']!= 0]
 	# 	aupdf.to_sql('aup', conn5, if_exists='append')
 	# 	print(aupdf)
-	
+	if EODCUPTrue == True & EODAUPTrue == True:
+		EODAUPTrue = False
+	if EODADWNTrue == True & EODCDWNTrue == True:
+		EODADWNTrue = False
+
 	thisdate = df.iloc[-1,0]
 	datadict = { "date": thisdate,"wasaup":[EODAUPTrue],"wascup":EODCUPTrue,"wasadwn":EODADWNTrue,"wascdwn":EODCDWNTrue,"volume10":relativevolume, "avgopeningvolume":avgopeningvolume,\
 	"Aupfail":EODAUPFail,"Cupfail":EODCUPFail,"Adwnfail":EODADWNFail,"Cdwnfail":EODCDWNFail,'betweenOR':EODbetweenOR, "belowbottomOR":EODbelowbottomOR,'abovetopOR':EODabovetopOR,\

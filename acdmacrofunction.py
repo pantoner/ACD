@@ -294,14 +294,20 @@ def acdmacro(tdf,df):
 	EODADWNFail = thisdf3.iloc[-1].wasadwnfail #3 fail
 	EODCDWNFail = thisdf3.iloc[-1].wascdwnfail # fail
 
+	if EODCDWNTrue == True & EODADWNTrue == True:
+		EODADWNTrue = False
+
+	if EODCUPTrue == True & EODAUPTrue == True:
+		EODAUPTrue = False
+
 	ACDMacro =0 
-	if EODADWNTrue and EODoverAup and EODCUPTrue:
+	if EODADWNTrue and EODabovetopOR and EODCUPTrue:
 		ACDMacro +=4
 	elif EODAUPTrue and EODbelowAdwn and EODCDWNTrue:
 		ACDMacro -=4
 	elif EODADWNTrue and EODoverAup and EODCUPTrue:
 		ACDMacro +=4
-	elif EODAUPTrue and EODbelowAdwn and EODCDWNTrue:
+	elif EODAUPTrue and EODbelowbottomOR and EODCDWNTrue:
 		ACDMacro -=4
 	elif EODAUPTrue and EODCDWNFail and EODbetweenOR:
 		ACDMacro +=3

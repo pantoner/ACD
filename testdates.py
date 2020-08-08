@@ -50,7 +50,7 @@ while True:
 	year = today.year; month = today.month; day =today.day
 	today = str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
 	#today="07-20-2020"  # temporary
-	conn3 = sqlite3.connect("symbollistdb.db")
+	conn3 = sqlite3.connect("alertsymbols.db")
 	cur = conn3.cursor()
 	query = 'SELECT * FROM symbols'
 	#query = 'SELECT * FROM Bulkowski'
@@ -91,9 +91,23 @@ while True:
 			# 	n-=1
 			# 	continue
 
+			# failure = 0
+			# top = 'cdwnaup'
+			# now = 7
+
+			# put this in another module and rewrite to call alerts table and call the popup plt -  and trigger it from a button on the UI homepage -  in addition to alerts popup
+
+			def msgfunc(ret_val, answer):
+			    if ret_val == 0:
+			        print('No')
+			    elif ret_val == 1:
+			        print answer
+
 			if outputdf.iloc[0]['Adwnfail'] == True and symbolname not in  Adwnfailsymbollist:
-				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "A down FAIL", 1)
+				ret_val = ctypes.windll.user32.MessageBoxW(0, str(symbolname), "A down FAIL", 1)
 				Adwnfailsymbollist.append(symbolname)
+				addalertline(failure,'adwn',now)
+
 			elif outputdf.iloc[0]['Aupfail'] == True and symbolname not in  Aupfailsymbollist:
 				ctypes.windll.user32.MessageBoxW(0, str(symbolname), "A up FAIL", 1)
 				Aupfailsymbollist.append(symbolname)
@@ -146,24 +160,30 @@ while True:
 	time.sleep(60.0 - ((time.time() - starttime) % 60.0))
 	
 
-	# 	datadict = { "date": thisdate,"wasaup":[EODAUPTrue],"wascup":EODCUPTrue,"wasadwn":EODADWNTrue,"wascdwn":EODCDWNTrue,"volume10":relativevolume, "avgopeningvolume":avgopeningvolume,\
-	# "Aupfail":EODAUPFail,"Cupfail":EODCUPFail,"Adwnfail":EODADWNFail,"Cdwnfail":EODCDWNFail,'betweenOR':EODbetweenOR, "belowbottomOR":EODbelowbottomOR,'abovetopOR':EODabovetopOR,\
-	#  "overaup":EODoverAup,"belowadwn":EODbelowAdwn,"aboveOR":EODaboveOR,"belowOR":EODbelowOR }
+	# today = pickle.load( open( "today.p", "rb" ) )
+	# today = str(today['year']+"-"+today['month']+"-"+today['day'])
+	# conn = sqlite3.connect("Plus5Earningsdb.db")
+	# conn2 = sqlite3.connect("Plus5minbymin.db")
+	# cur2 = conn2.cursor()
+	# query2 = 'DROP TABLE IF EXISTS Aup'
+	# query3 = 'DROP TABLE IF EXISTS Adwn'
+	# cur2.execute(query2)
+	# cur2.execute(query3)
 
-	# EODabovetopOR = thisdf3.iloc[-1].EODabovetopOR  # 1 result
-	# EODbelowbottomOR = thisdf3.iloc[-1].EODbelowbottomOR  # 2 result
-	# EODoverAup = thisdf3.iloc[-1].EODoverAup  # 3 result
-	# EODbelowAdwn = thisdf3.iloc[-1].EODbelowAdwn  # 4 result
-	# EODbetweenOR = thisdf3.iloc[-1].EODbetweenOR  # 5 result
-	# EODaboveOR = thisdf3.iloc[-1].EODaboveOR  # 6 result
-	# EODbelowOR = thisdf3.iloc[-1].EODbelowOR  # 7 result
+	# 	starttime = time.time()
+	# while True:
+	# 	conn3 = sqlite3.connect("symbollistdb.db")
+	# 	cur = conn3.cursor()
+	# 	query = 'SELECT * FROM symbols'
+	# 	cur.execute(query)
+	# 	rows = cur.fetchall()
+	# 	for row in rows:
+	# 		symbolname = str(row[1])
 
-	# EODAUPTrue = thisdf3.iloc[-1].wasaup  #1 succss  wasaup AUPTrue
-	# EODCUPTrue = thisdf3.iloc[-1].wascup  #2 success wascup CUPTrue 
-	# EODADWNTrue = thisdf3.iloc[-1].wasadwn#3 success wasadwm  ADWNTrue
-	# EODCDWNTrue = thisdf3.iloc[-1].wascdwn #4 success wascdwn  CDWNTrue
 
-	# EODAUPFail = thisdf3.iloc[-1].wasaupfail #1 fail
-	# EODCUPFail = thisdf3.iloc[-1].wascupfail #2 fail
-	# EODADWNFail = thisdf3.iloc[-1].wasadwnfail #3 fail
-	# EODCDWNFail = thisdf3.iloc[-1].wascdwnfail # fail
+				# 	#plus5df = pd.read_sql_query(f"SELECT * from range WHERE symbol = {str(symbolname)}", conn)
+				# cur = conn.cursor()
+				# rows = cur.fetchall()
+				# query = 'SELECT * FROM range WHERE symbol = ? AND today = ?'
+				# cur.execute(query, (symbolname,today,))
+				# records = cur.fetchall()
