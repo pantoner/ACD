@@ -5,16 +5,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from pandas.tseries.offsets import BDay
-base_url = "https://api.gemini.com/v2"
-response = requests.get(base_url + "/candles/ltcbtc/1hr")
-btc_candle_data = response.json()
-print(btc_candle_data[0])
-lasttime = int(str(btc_candle_data[-1][0])[:-3])
-firsttime = int(str(btc_candle_data[0][0])[:-3])
-lasttime = (datetime.fromtimestamp(lasttime) - timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S')
-firsttime = (datetime.fromtimestamp(firsttime) - timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S')
-df = pd.DataFrame(btc_candle_data)
-print(df)
+
 
 def getstartdate():
 	thistoday = pd.datetime.today()
@@ -22,7 +13,7 @@ def getstartdate():
 	startdate = thirtydays[0:10]
 	return startdate
 
-def getnewdate(df):
+def getnewdate(df,btc_candle_data):
 	n=0
 	newdate =[]
 	newtime =[]
@@ -39,7 +30,7 @@ def getnewdate(df):
 	df.columns = ['thistime','open','high','low','close','volume','newdate']
 	df = pd.concat([df, newtimedf], axis=1, ignore_index=True)
 	df.columns = ['thistime','open','high','low','close','volume','newdate','newtime']
-	df['open'] = df.open * 100000;df['high'] = df.high * 100000;df['low'] = df.low * 100000;df['close'] = df.close * 100000
+	df['open'] = df.open;df['high'] = df.high;df['low'] = df.low;df['close'] = df.close
 	return df
 
 
@@ -67,102 +58,216 @@ def getminmax(df):
 	outputdf = pd.DataFrame(dictlist)
 	return outputdf
 
-df = getnewdate(df)
-openingrangedf = getfirstdailyhour(df)	
-minmaxout = getminmax(df)
-startdate = getstartdate()
 
-#print(minmaxout)
+def getbtcprices():
 
- # def getonly30(df):
-	# n=0
- # 	while n < len(df):
- # 		thedate = df.newtime[n][0:10]
- # 		btcprices[btcprices['date'] == startdate].index.values[0]
- # 		if theda
-
-# thedate = df.newtime[n][0:10]
-# thetime = df.newtime.values[n][11:16]
-
-dfhighlow = minmaxout.groupby('date').agg({'allhigh': max, 'alllow': min}).reset_index()
-thirtydayindex = dfhighlow[dfhighlow['date'] == startdate].index.values[0]
-last30days = dfhighlow[dfhighlow.index >= thirtydayindex]
+	base_url = "https://api.gemini.com/v2"
+	response = requests.get(base_url + "/candles/btcusd/1hr")
+	btc_candle_data = response.json()
+	print(btc_candle_data[0])
+	lasttime = int(str(btc_candle_data[-1][0])[:-3])
+	firsttime = int(str(btc_candle_data[0][0])[:-3])
+	lasttime = (datetime.fromtimestamp(lasttime) - timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S')
+	firsttime = (datetime.fromtimestamp(firsttime) - timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S')
+	df = pd.DataFrame(btc_candle_data)
+	print(df)
 
 
-# openrangedf needs last30day timeframe -- 
-openingrangedf['winloss'] = openingrangedf.open -openingrangedf.close
-print(openingrangedf)
-print(last30days)
-openingrangedf = pd.merge(openingrangedf, last30days, how='right', left_on='date', right_on='date')
-#print(output)
-winlist =[]
-notwinlist = []
-n=0
-try:
-	while n < len(openingrangedf):
-		x = 20
-		while x < 120:
-			if (openingrangedf.orhigh.values[n] + x) < openingrangedf.allhigh.values[n]:
-				thisdict = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
-				winlist.append(thisdict)
-				x+= 1
-			else:
-				notwin = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
-				notwinlist.append(notwin)
-				x+=1
-		n+=1
-except IndexError:
-	print('complete')
-
-windf = pd.DataFrame(winlist)
-notwindf = pd.DataFrame(notwinlist)
-windf.columns =['index','number','outcome']
-
-winoutcome = windf.groupby('number')['outcome'].sum()
-print(winoutcome)
+	df = getnewdate(df,btc_candle_data)
+	openingrangedf = getfirstdailyhour(df)	
+	minmaxout = getminmax(df)
+	startdate = getstartdate()
 
 
-loselist =[]
-notloselist = []
-n=0
-try:
-	while n < len(openingrangedf):
-		x = 20
-		while x < 120:
-			if (openingrangedf.orlow.values[n] - x) < openingrangedf.alllow.values[n]:
-				thisdict = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
-				loselist.append(thisdict)
-				x+= 1
-			else:
-				notlose = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
-				notloselist.append(notlose)
-				x+= 1
-		n+=1
-except IndexError:
-	print('complete')
+	dfhighlow = minmaxout.groupby('date').agg({'allhigh': max, 'alllow': min}).reset_index()
+	thirtydayindex = dfhighlow[dfhighlow['date'] == startdate].index.values[0]
+	last30days = dfhighlow[dfhighlow.index >= thirtydayindex]
 
 
-losedf = pd.DataFrame(loselist)
-notlosedf = pd.DataFrame(notloselist)
+	# openrangedf needs last30day timeframe -- 
+	openingrangedf['winloss'] = openingrangedf.open -openingrangedf.close
+	print(openingrangedf)
+	print(last30days)
+	openingrangedf = pd.merge(openingrangedf, last30days, how='right', left_on='date', right_on='date')
+	#print(output)
+	winlist =[]
+	notwinlist = []
+	n=0
+	try:
+		while n < len(openingrangedf):
+			x = 20
+			while x < 120:
+				if (openingrangedf.orhigh.values[n] + x) < openingrangedf.allhigh.values[n]:
+					thisdict = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
+					winlist.append(thisdict)
+					x+= 1
+				else:
+					notwin = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
+					notwinlist.append(notwin)
+					x+=1
+			n+=1
+	except IndexError:
+		print('complete')
 
-losedf.columns =['index','number','outcome']
+	windf = pd.DataFrame(winlist)
+	notwindf = pd.DataFrame(notwinlist)
+	windf.columns =['index','number','outcome']
 
-loseoutcome = losedf.groupby('number')['outcome'].sum()
-print(loseoutcome)
+	winoutcome = windf.groupby('number')['outcome'].sum()
+	print(winoutcome)
 
-windf = pd.DataFrame(winoutcome)
-losedf = pd.DataFrame(loseoutcome)
 
-outcomedf = pd.merge(windf,losedf,how='left',left_index =True,right_index =True)
-outcomedf['bestworst'] = outcomedf.outcome_x - outcomedf.outcome_y
+	loselist =[]
+	notloselist = []
+	n=0
+	try:
+		while n < len(openingrangedf):
+			x = 20
+			while x < 120:
+				if (openingrangedf.orlow.values[n] - x) < openingrangedf.alllow.values[n]:
+					thisdict = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
+					loselist.append(thisdict)
+					x+= 1
+				else:
+					notlose = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
+					notloselist.append(notlose)
+					x+= 1
+			n+=1
+	except IndexError:
+		print('complete')
 
-thebestwin = windf.loc[windf['outcome'].idxmax()]
-# print(f'this is the best {thebestwin}')
-thebestlose = losedf.loc[losedf['outcome'].idxmin()]
 
-aplusadd = thebestwin.name
-aminussubtract = thebestlose.name
-print(thebestwin)
-print(thebestlose)
-print(aplusadd, aminussubtract)
-print(openingrangedf.orhigh[0], openingrangedf.orlow[0],openingrangedf.date[0])
+	losedf = pd.DataFrame(loselist)
+	notlosedf = pd.DataFrame(notloselist)
+
+	losedf.columns =['index','number','outcome']
+
+	loseoutcome = losedf.groupby('number')['outcome'].sum()
+	print(loseoutcome)
+
+	windf = pd.DataFrame(winoutcome)
+	losedf = pd.DataFrame(loseoutcome)
+
+	outcomedf = pd.merge(windf,losedf,how='left',left_index =True,right_index =True)
+	outcomedf['bestworst'] = outcomedf.outcome_x - outcomedf.outcome_y
+
+	thebestwin = windf.loc[windf['outcome'].idxmax()]
+	# print(f'this is the best {thebestwin}')
+	thebestlose = losedf.loc[losedf['outcome'].idxmin()]
+
+	aplusadd = thebestwin.name
+	aminussubtract = thebestlose.name
+	print(thebestwin)
+	print(thebestlose)
+	print(aplusadd, aminussubtract)
+	aup = openingrangedf.orhigh[0] + aplusadd; adwn = openingrangedf.orlow[0] - aminussubtract
+	pivot = round(((df.head(1).high.values[0]+ df.head(1).low.values[0] + df.head(1).close.values[0])/3),2)
+	#print(round(pivot,2),aup, adwn)
+	return(pivot,aup,adwn)
+
+
+def getethprices():
+
+	base_url = "https://api.gemini.com/v2"
+	response = requests.get(base_url + "/candles/ethusd/1hr")
+	btc_candle_data = response.json()
+	print(btc_candle_data[0])
+	lasttime = int(str(btc_candle_data[-1][0])[:-3])
+	firsttime = int(str(btc_candle_data[0][0])[:-3])
+	lasttime = (datetime.fromtimestamp(lasttime) - timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S')
+	firsttime = (datetime.fromtimestamp(firsttime) - timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S')
+	df = pd.DataFrame(btc_candle_data)
+	print(df)
+
+
+	df = getnewdate(df,btc_candle_data)
+	openingrangedf = getfirstdailyhour(df)	
+	minmaxout = getminmax(df)
+	startdate = getstartdate()
+
+
+	dfhighlow = minmaxout.groupby('date').agg({'allhigh': max, 'alllow': min}).reset_index()
+	thirtydayindex = dfhighlow[dfhighlow['date'] == startdate].index.values[0]
+	last30days = dfhighlow[dfhighlow.index >= thirtydayindex]
+
+
+	# openrangedf needs last30day timeframe -- 
+	openingrangedf['winloss'] = openingrangedf.open -openingrangedf.close
+	print(openingrangedf)
+	print(last30days)
+	openingrangedf = pd.merge(openingrangedf, last30days, how='right', left_on='date', right_on='date')
+	#print(output)
+	winlist =[]
+	notwinlist = []
+	n=0
+	try:
+		while n < len(openingrangedf):
+			x = 20
+			while x < 120:
+				if (openingrangedf.orhigh.values[n] + x) < openingrangedf.allhigh.values[n]:
+					thisdict = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
+					winlist.append(thisdict)
+					x+= 1
+				else:
+					notwin = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
+					notwinlist.append(notwin)
+					x+=1
+			n+=1
+	except IndexError:
+		print('complete')
+
+	windf = pd.DataFrame(winlist)
+	notwindf = pd.DataFrame(notwinlist)
+	windf.columns =['index','number','outcome']
+
+	winoutcome = windf.groupby('number')['outcome'].sum()
+	print(winoutcome)
+
+
+	loselist =[]
+	notloselist = []
+	n=0
+	try:
+		while n < len(openingrangedf):
+			x = 20
+			while x < 120:
+				if (openingrangedf.orlow.values[n] - x) < openingrangedf.alllow.values[n]:
+					thisdict = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
+					loselist.append(thisdict)
+					x+= 1
+				else:
+					notlose = {'index':[n],'number':x,'winloss': openingrangedf.winloss.values[n]}
+					notloselist.append(notlose)
+					x+= 1
+			n+=1
+	except IndexError:
+		print('complete')
+
+
+	losedf = pd.DataFrame(loselist)
+	notlosedf = pd.DataFrame(notloselist)
+
+	losedf.columns =['index','number','outcome']
+
+	loseoutcome = losedf.groupby('number')['outcome'].sum()
+	print(loseoutcome)
+
+	windf = pd.DataFrame(winoutcome)
+	losedf = pd.DataFrame(loseoutcome)
+
+	outcomedf = pd.merge(windf,losedf,how='left',left_index =True,right_index =True)
+	outcomedf['bestworst'] = outcomedf.outcome_x - outcomedf.outcome_y
+
+	thebestwin = windf.loc[windf['outcome'].idxmax()]
+	# print(f'this is the best {thebestwin}')
+	thebestlose = losedf.loc[losedf['outcome'].idxmin()]
+
+	aplusadd = thebestwin.name
+	aminussubtract = thebestlose.name
+	print(thebestwin)
+	print(thebestlose)
+	print(aplusadd, aminussubtract)
+	aup = openingrangedf.orhigh[0] + aplusadd; adwn = openingrangedf.orlow[0] - aminussubtract
+	pivot = round(((df.head(1).high.values[0]+ df.head(1).low.values[0] + df.head(1).close.values[0])/3),2)
+	#print(round(pivot,2),aup, adwn)
+	return(pivot,aup,adwn)

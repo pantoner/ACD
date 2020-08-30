@@ -6,9 +6,9 @@ import numpy as np
 from datetime import datetime, timedelta
 from pandas.tseries.offsets import BDay
 base_url = "https://api.gemini.com/v2"
-response = requests.get(base_url + "/candles/btcusd/1hr")
+response = requests.get(base_url + "/candles/ethusd/1hr")
 btc_candle_data = response.json()
-print(btc_candle_data[0])
+#print(btc_candle_data[0])
 lasttime = int(str(btc_candle_data[-1][0])[:-3])
 firsttime = int(str(btc_candle_data[0][0])[:-3])
 lasttime = (datetime.fromtimestamp(lasttime) - timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S')
@@ -22,7 +22,7 @@ while n < len(df.index):
 	newdate.append(firsttime)
 	n+=1
 newdatedf = pd.DataFrame(newdate)
-print(newdatedf)
+#print(newdatedf)
 df = pd.concat([df, newdatedf], axis=1, ignore_index=True)
 df.columns = ['thistime','open','high','low','close','volume','newtime']
 #df.to_csv('newoutput.csv')
@@ -34,7 +34,7 @@ while n < len(df):
 		openrange.append({'date':df.newtime[n][0:10],'orhigh':df.high.values[n],'orlow':df.low.values[n],'open':df.open.values[n],'close':df.close.values[n]})
 		n+=1
 	else:
-		print(df.newtime.values[n][11:16])
+		#print(df.newtime.values[n][11:16])
 		allelse.append({'date':df.newtime[n][0:10],'allhigh':df.high.values[n],'alllow':df.low.values[n],'open':df.open.values[n],'close':df.close.values[n]})
 		n+=1
 
@@ -56,21 +56,21 @@ btcprices = btcprices.reset_index(drop=True)
 
 thistoday = pd.datetime.today()
 thirtydays	= (pd.datetime.today()-timedelta(days=30)).isoformat()
-print(thirtydays)
+#print(thirtydays)
 startdate = thirtydays[0:10]
 # year = thirtydays.year; month = thirtydays.month; day =thirtydays.day
 # startdate = str(year) + "-"+ str(month).zfill(2) + "-" + str(day).zfill(2)
 #print(startdate)
-print(startdate)
+#print(startdate)
 thirtydayindex = btcprices[btcprices['date'] == startdate].index.values[0]
 
 last30days = btcprices[btcprices.index >= thirtydayindex]
 last30days
 #print(last30days)
 ordiff = sum(last30days.orhigh - last30days.orlow)/30
-print(ordiff)
+#print(ordiff)
 alldiff = sum(last30days.allhigh - last30days.alllow)/30
-print(alldiff/5)
+#print(alldiff/5)
 winloss = last30days.close - last30days.open
 #print(winloss[winloss >0])
 
@@ -79,7 +79,7 @@ winloss = ordf.close - ordf.open
 winlossdf = pd.DataFrame(winloss)
 last30days = pd.merge(last30days,winlossdf,how='left',left_index =True,right_index=True)
 last30days.columns = ['date','allhigh','alllow','orhigh','orlow','winloss','open','close']
-print(last30days)
+# print(last30days)
 truerange = sum(df.open - df.close)/30
 
 winlist =[]
@@ -107,7 +107,7 @@ windf.columns =['index','number','outcome']
 #losedf.columns =['index','number','outcome']
 
 winoutcome = windf.groupby('number')['outcome'].sum()
-print(winoutcome)
+# print(winoutcome)
 
 
 loselist =[]
@@ -136,7 +136,7 @@ notlosedf = pd.DataFrame(notloselist)
 losedf.columns =['index','number','outcome']
 
 loseoutcome = losedf.groupby('number')['outcome'].sum()
-print(loseoutcome)
+# print(loseoutcome)
 
 windf = pd.DataFrame(winoutcome)
 losedf = pd.DataFrame(loseoutcome)
@@ -150,12 +150,16 @@ thebestlose = losedf.loc[losedf['outcome'].idxmin()]
 
 aplusadd = thebestwin.name
 aminussubtract = thebestlose.name
-print(thebestwin)
-print(thebestlose)
+# print(thebestwin)
+# print(thebestlose)
 print(aplusadd, aminussubtract)
 #print(ordf.orhigh[0]+aplusadd,ordf.orlow[0]-aminussubtract)
-print(truerange)
-print(thirtydayindex)
+# print(truerange)
+# print(thirtydayindex)
+aplus = openrange[0]['orhigh'] + aplusadd
+aminus = openrange[0]['orlow'] - aminussubtract
+print(df.head(1))
+print(aplus,aminus)
 
 # middlelist =[]
 # outlist = []

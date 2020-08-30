@@ -45,6 +45,8 @@ import saveoutput
 #import macroACDfinalUI
 import volume
 import config
+import spyrelative
+import gemini3
 
 
 #pd.set_option('colheader_justify', 'center')   # FOR TABLE <th>
@@ -380,6 +382,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.resetcolor()
 		self.getalleventsnow()
 
+		btcprices = gemini3.getbtcprices()
+		ethprices = gemini3.getethprices()
+
+		self.lineEditBTCPivot.setText(str(btcprices[0]));
+		self.lineEditBTCAup.setText(str(btcprices[1]));
+		self.lineEditBTCAdwn.setText(str(btcprices[2]));
+		self.lineEditETHPivot.setText(str(ethprices[0]));
+		self.lineEditETHAup.setText(str(ethprices[1]));
+		self.lineEditETHAdwn.setText(str(ethprices[2]));
+
+		if ethprices[0] > ethprices[1]:
+			self.lineEditETHPivot.setStyleSheet("color: rgb(0, 170, 127);")
+		elif ethprices[0] < ethprices[2]:
+			self.lineEditETHPivot.setStyleSheet("color: rgb(255, 0, 0);")
+		else:
+			self.lineEditETHPivot.setStyleSheet("color: rgb(0, 0, 0);")
+		
+		if btcprices[0] > btcprices[1]:
+			self.lineEditBTCPivot.setStyleSheet("color: rgb(0, 170, 127);")
+		elif btcprices[0] < btcprices[2]:
+			self.lineEditBTCPivot.setStyleSheet("color: rgb(255, 0, 0);")
+		else:
+			self.lineEditBTCPivot.setStyleSheet("color: rgb(0, 0, 0);")
+
+
 		if os.path.exists("yesterday.p"):
 			os.remove("yesterday.p")
 
@@ -468,6 +495,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			df['lowprice'] = df['low'].cummin()
 			openrangelow = df.loc[19,'lowprice']
 			openrangehigh = df.loc[19,'highprice']
+
+
 			
 			print(f"open range high {openrangehigh} open range low {openrangelow}")
 			self.lineEditOpenRangeHigh.setText(str(openrangehigh))
@@ -477,6 +506,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			self.lineEditOpenRangeLow.setText(str("not time yet"))
 
 		 #get pivot from yesterday
+		try: 
+			spyrelatived  = spyrelative.spyrelative() 
+			forspyrange =[]
+			for i in range(1,60):
+				nowclose = round(df.iloc[-i, 1],2)
+				nowopen = round(df.iloc[-i, 4],2)
+				nowhigh = round(df.iloc[-i,2],2)
+				nowlow = round(df.iloc[-i,3],2)
+				nowrange = round((nowclose + nowlow + nowhigh)/3,2)
+				forspyrange.append(nowrange)
+				#spyupdown = spyrange[-1]/spyrange[0]
+			symbollast10min = round(forspyrange[-1]/forspyrange[0],4)
+			#print(f'test this {symbollast10min}')
+			relativespystrength = round(symbollast10min/spyrelatived,7)
+			self.lineEditLastOpen.setText(str(relativespystrength))
+
+			if relativespystrength >= 0:
+				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
+			else:
+				self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
+		except:
+			print('let one hour pass')
+	
 		try:
 			ydf = pd.read_csv(StringIO(client.get_ticker_price(symbolname,
 				fmt='csv',
@@ -596,7 +648,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 			self.lineEditRelativeVolume.setText(str(relativevolume))
 			
-			self.lineEditLastOpen.setText(str(nowopen))
+			#self.lineEditLastOpen.setText(str(nowopen))  -- borrowing to use it for spyrelative 
 
 			if float(nowrange) > Aup:
 				self.lineEdit10mintdypivot.setStyleSheet("color: rgb(0, 170, 127);")
@@ -607,7 +659,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				
 			if nowclose > Aup and nowopen > Aup and pivottop < Aup and pivottop > openrangelow: 
 				self.lineEditLastClose.setStyleSheet("color: rgb(0, 170, 127);")
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
+				#self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
 				self.lineEditAdwn.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 170, 127);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(85, 0, 255);")
@@ -616,7 +668,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
 			elif nowclose > Aup and nowopen > Aup and pivottop < Aup and pivottop < openrangelow:
 				self.lineEditLastClose.setStyleSheet("color: rgb(0, 170, 127);")
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
 				self.lineEditAdwn.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 170, 127);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
@@ -625,7 +677,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditOpenRangeLow.setStyleSheet("color:rgb(85, 0, 255);")
 			elif nowclose > Aup and nowopen > Aup and pivottop > nowclose and pivottop > nowopen:
 				self.lineEditLastClose.setStyleSheet("color: rgb(0, 170, 127);")
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
 				self.lineEditAdwn.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(255, 255, 0);")
@@ -636,7 +688,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 			elif nowclose < Adwn and nowopen < Adwn and pivotbottom < Adwn and pivotbottom < openrangehigh: 
 				self.lineEditLastClose.setStyleSheet("color: rgb(255, 0, 0);")
-				self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
 				self.lineEditAdwn.setStyleSheet("color: rgb(255, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
@@ -645,7 +697,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
 			elif nowclose < Adwn and nowopen < Adwn and pivotbottom < Adwn and pivotbottom > openrangehigh: 
 				self.lineEditLastClose.setStyleSheet("color: rgb(255, 0, 0);")
-				self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
 				self.lineEditAdwn.setStyleSheet("color: rgb(255, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
@@ -654,7 +706,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
 			elif nowclose < Adwn and nowopen < Adwn and pivotbottom  < nowclose and pivottbottom < nowopen:
 				self.lineEditLastClose.setStyleSheet("color: rgb(255, 0, 0);")
-				self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
 				self.lineEditAdwn.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
@@ -664,7 +716,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 		
 			elif nowopen > Aup and nowclose < Aup:
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
 				self.lineEditLastClose.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
@@ -673,7 +725,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditAdwn.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
 			elif nowopen < Adwn and nowclose > Adwn:
-				self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
 				self.lineEditLastClose.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
@@ -682,7 +734,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditAdwn.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
 			elif nowopen < Aup and nowclose > Aup:
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditLastClose.setStyleSheet("color: rgb(0, 170, 127);")
 				self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
@@ -691,7 +743,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditAdwn.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
 			elif nowopen > Adwn and nowclose < Adwn:
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditLastClose.setStyleSheet("color: rgb(255, 0, 0);")
 				self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
@@ -701,7 +753,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
 			elif nowopen < Adwn and nowclose < Adwn:
 				self.lineEditLastClose.setStyleSheet("color: rgb(255, 0, 0);")
-				self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(255, 0, 0);")
 				self.lineEditAdwn.setStyleSheet("color: rgb(255, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
@@ -711,7 +763,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 			elif nowclose > Aup and nowopen > Aup: 
 				self.lineEditLastClose.setStyleSheet("color: rgb(0, 170, 127);")
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(0, 170, 127);")
 				self.lineEditAdwn.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditAup.setStyleSheet("color: rgb(0, 170, 127);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
@@ -719,7 +771,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				self.lineEditOpenRangeHigh.setStyleSheet("color:rgb(0, 0, 0);")
 				self.lineEditOpenRangeLow.setStyleSheet("color:rgb(85, 0, 255);")
 			else:
-				self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
+				# self.lineEditLastOpen.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditLastClose.setStyleSheet("color: rgb(0, 0, 0);")
 				self.lineEditOpenRangeLow.setStyleSheet("color:rgb(0, 0, 0);")
 				self.lineEditPivotRangeTop.setStyleSheet("color:rgb(0, 0, 0);")
